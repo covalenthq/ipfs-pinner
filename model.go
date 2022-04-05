@@ -46,7 +46,7 @@ func (pro *pinataResponseObject) GetTimestamp() int64 {
 }
 
 func (pro *pinataResponseObject) MarshalJSON() ([]byte, error) {
-	jsonStr := fmt.Sprintf("{\"IpfsHash\": %v, \"PinSize\": %d, \"Timestamp\": %lld}", pro.GetCid(), pro.GetPinSize(), pro.GetTimestamp())
+	jsonStr := fmt.Sprintf("{\"IpfsHash\": %v, \"PinSize\": %d, \"Timestamp\": %d}", pro.GetCid(), pro.GetPinSize(), pro.GetTimestamp())
 	return []byte(jsonStr), nil
 }
 
