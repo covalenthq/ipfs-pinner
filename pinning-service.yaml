@@ -161,11 +161,13 @@ paths:
   #IPFS pinning service API spec endpoints (end)
 
   # complete file pin api path (start)
-  /:
+  /pinning/pinFileToIPFS:
     post:
       summary: Upload file to IPFS
       description: pinata services' upload file to ipfs option
-      operationId: fileUpload
+      operationId: pinataFileUpload
+      servers:
+        - url: https://api.pinata.cloud
       tags:
         - filepin
       requestBody:

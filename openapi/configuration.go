@@ -110,6 +110,12 @@ func NewConfiguration() *Configuration {
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{
+			"FilepinApiService.PinataFileUpload": {
+				{
+					URL: "https://api.pinata.cloud",
+					Description: "No description provided",
+				},
+			},
 		},
 	}
 	return cfg

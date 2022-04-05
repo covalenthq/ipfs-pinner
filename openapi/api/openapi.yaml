@@ -480,10 +480,10 @@ paths:
       summary: Replace pin object
       tags:
       - pins
-  /:
+  /pinning/pinFileToIPFS:
     post:
       description: pinata services' upload file to ipfs option
-      operationId: fileUpload
+      operationId: pinataFileUpload
       requestBody:
         $ref: '#/components/requestBodies/inline_object'
         content:
@@ -571,6 +571,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Failure'
           description: Error response (Unexpected internal server error)
+      servers:
+      - url: https://api.pinata.cloud
       summary: Upload file to IPFS
       tags:
       - filepin

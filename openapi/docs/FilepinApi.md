@@ -4,13 +4,13 @@ All URIs are relative to *https://pinning-service.example.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**FileUpload**](FilepinApi.md#FileUpload) | **Post** / | Upload file to IPFS
+[**PinataFileUpload**](FilepinApi.md#PinataFileUpload) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
 
 
 
-## FileUpload
+## PinataFileUpload
 
-> PinataResponse FileUpload(ctx).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
+> PinataResponse PinataFileUpload(ctx).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
 
 Upload file to IPFS
 
@@ -35,13 +35,13 @@ func main() {
 
     configuration := openapiclient.NewConfiguration()
     apiClient := openapiclient.NewAPIClient(configuration)
-    resp, r, err := apiClient.FilepinApi.FileUpload(context.Background()).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
+    resp, r, err := apiClient.FilepinApi.PinataFileUpload(context.Background()).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error when calling `FilepinApi.FileUpload``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Error when calling `FilepinApi.PinataFileUpload``: %v\n", err)
         fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
     }
-    // response from `FileUpload`: PinataResponse
-    fmt.Fprintf(os.Stdout, "Response from `FilepinApi.FileUpload`: %v\n", resp)
+    // response from `PinataFileUpload`: PinataResponse
+    fmt.Fprintf(os.Stdout, "Response from `FilepinApi.PinataFileUpload`: %v\n", resp)
 }
 ```
 
@@ -51,7 +51,7 @@ func main() {
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiFileUploadRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiPinataFileUploadRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

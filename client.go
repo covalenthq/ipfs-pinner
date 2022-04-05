@@ -17,31 +17,37 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 )
 
-var logger = logging.Logger("pinning-service-http-client")
+var logger = logging.Logger("pinning-api-extended")
 
-const UserAgent = "go-pinning-service-http-client"
+const UserAgent = "pinning-api-extended"
 
 type Client struct {
 	client *openapi.APIClient
+	ps     PinningService
 }
 
-func NewClient(url, fileUploadUrl, bearerToken string) *Client {
+func IsIPFSSupportedFor(ps PinningService) bool {
+	return ps.filePinningSupported()
+}
+
+func NewClient(request ClientCreateRequest) *Client {
+	// assuming we are getting a supported pinning service request
 	config := openapi.NewConfiguration()
 	config.UserAgent = UserAgent
-	bearer := fmt.Sprintf("Bearer %s", bearerToken)
+	bearer := fmt.Sprintf("Bearer %s", request.bearerToken)
 	config.AddDefaultHeader("Authorization", bearer)
 	config.Servers = openapi.ServerConfigurations{
 		openapi.ServerConfiguration{
-			URL:         url,
-			Description: "IPFS pinning service API",
+			URL:         request.pinningServiceBaseUrl,
+			Description: "IPFS pinning service API base",
 		},
 		openapi.ServerConfiguration{
-			URL:         fileUploadUrl,
+			URL:         request.filePinBaseUrl,
 			Description: "pinning service url to upload files to",
 		},
 	}
 
-	return &Client{client: openapi.NewAPIClient(config)}
+	return &Client{client: openapi.NewAPIClient(config), ps: request.ps}
 }
 
 // TODO: We should probably make sure there are no duplicates sent
@@ -335,9 +341,23 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (PinSt
 	return &pinStatusObject{*result}, nil
 }
 
-func (c *Client) UploadFile(ctx context.Context, file *os.File) (PinataResponseGetter, error) {
-	ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1)  // assuming index = 1 is the file uploader url
-	poster := c.client.FilepinApi.FileUpload(ctx)
+func (c *Client) UploadFile(ctx context.Context, file *os.File) (cid.Cid, error) {
+	if c.ps == Pinata {
+		res, err := c.UploadFileViaPinata(ctx, file)
+		if err != nil {
+			return cid.Undef, fmt.Errorf("%w", err)
+		}
+
+		return res.GetCid(), nil
+	}
+	panic("only pinata supported for file upload")
+	// else web3.storge (to be added...)
+}
+
+func (c *Client) UploadFileViaPinata(ctx context.Context, file *os.File) (PinataResponseGetter, error) {
+	//ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1) // index = 1 is the file pin url
+
+	poster := c.client.FilepinApi.PinataFileUpload(ctx)
 	meta := openapi.NewPinataMetadata()
 	meta.SetName("firstup")
 	opt := openapi.NewPinataOptions()

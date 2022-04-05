@@ -14,30 +14,31 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	url, ok := os.LookupEnv("PS_URL")
-	if !ok {
-		panic("No Pinning Service URL found")
-	}
+	// url, ok := os.LookupEnv("PS_URL")
+	// if !ok {
+	// 	panic("No Pinning Service URL found")
+	// }
 
-	fileUploadUrl, ok := os.LookupEnv("PS_UURL")
-	if !ok {
-		panic("No Pinning Upload URL found")
-	}
+	// fileUploadUrl, ok := os.LookupEnv("PS_UURL")
+	// if !ok {
+	// 	panic("No Pinning Upload URL found")
+	// }
 
 	key, ok := os.LookupEnv("PS_KEY")
 	if !ok {
 		panic("No Pinning Service API Key found")
 	}
 
-	c := pinclient.NewClient(url, fileUploadUrl, key)
-
 	file := createTempFileForUpload()
-	resp, err := c.UploadFile(ctx, file)
+	req := pinclient.NewClientRequest(pinclient.Pinata).BearerToken(key)
+	client := pinclient.NewClient(req)
+
+	resp, err := client.UploadFile(ctx, file)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("pinata pin response is: %v", resp)
+	fmt.Printf("pinata pin response is: %v\n", resp.String())
 
 	//	ps1, err1 := c.Add(ctx)
 
@@ -52,17 +53,17 @@ func main() {
 	}
 	_ = ipfsPgCid
 
-	listPins(ctx, c)
+	listPins(ctx, client)
 
 	fmt.Println("Adding libp2p home page")
-	ps, err := c.Add(ctx, libp2pCid, pinclient.PinOpts.WithName("libp2p"))
+	ps, err := client.Add(ctx, libp2pCid, pinclient.PinOpts.WithName("libp2p"))
 	if err == nil {
 		fmt.Printf("PinStatus: %v \n", ps)
 	} else {
 		fmt.Println(err)
 	}
 
-	listPins(ctx, c)
+	listPins(ctx, client)
 
 	fmt.Println("Check on pin status")
 	if ps == nil {
@@ -71,7 +72,7 @@ func main() {
 
 	var pinned bool
 	for !pinned {
-		status, err := c.GetStatusByID(ctx, ps.GetRequestId())
+		status, err := client.GetStatusByID(ctx, ps.GetRequestId())
 		if err == nil {
 			fmt.Println(status.GetStatus())
 			pinned = status.GetStatus() == pinclient.StatusPinned
@@ -81,17 +82,17 @@ func main() {
 		time.Sleep(time.Millisecond * 500)
 	}
 
-	listPins(ctx, c)
+	listPins(ctx, client)
 
 	fmt.Println("Delete pin")
-	err = c.DeleteByID(ctx, ps.GetRequestId())
+	err = client.DeleteByID(ctx, ps.GetRequestId())
 	if err == nil {
 		fmt.Println("Successfully deleted pin")
 	} else {
 		fmt.Println(err)
 	}
 
-	listPins(ctx, c)
+	listPins(ctx, client)
 }
 
 func listPins(ctx context.Context, c *pinclient.Client) {
@@ -113,7 +114,7 @@ func createTempFileForUpload() *os.File {
 		panic(err)
 	}
 
-	f.Write([]byte("bahbahdfdfeebahbahnginx"))
+	f.Write([]byte("11eebahbahdfdfeebahbahnginx"))
 	f.Sync()
 	f.Close()
 
