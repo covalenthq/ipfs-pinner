@@ -1,10 +1,13 @@
 package ipfs_pin_lib
 
+import "net/http"
+
 type ClientCreateRequest struct {
 	ps                    PinningService
 	pinningServiceBaseUrl string
 	filePinBaseUrl        string
 	bearerToken           string
+	httpClient            *http.Client
 }
 
 func NewClientRequest(ps PinningService) ClientCreateRequest {
@@ -26,5 +29,10 @@ func (r ClientCreateRequest) PinningServiceBaseUrl(url string) ClientCreateReque
 
 func (r ClientCreateRequest) FilePinBaseUrl(url string) ClientCreateRequest {
 	r.filePinBaseUrl = url
+	return r
+}
+
+func (r ClientCreateRequest) HttpClient(client http.Client) ClientCreateRequest {
+	r.httpClient = &client
 	return r
 }

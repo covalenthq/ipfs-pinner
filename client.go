@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	ihttp "github.com/covalenthq/ipfs-pin-lib/http"
 	openapi "github.com/covalenthq/ipfs-pin-lib/openapi"
 
 	"github.com/ipfs/go-cid"
@@ -33,6 +34,9 @@ func IsIPFSSupportedFor(ps PinningService) bool {
 func NewClient(request ClientCreateRequest) *Client {
 	// assuming we are getting a supported pinning service request
 	config := openapi.NewConfiguration()
+	if request.httpClient == nil {
+		request.httpClient = ihttp.NewHttpClient(nil)
+	}
 	config.UserAgent = UserAgent
 	bearer := fmt.Sprintf("Bearer %s", request.bearerToken)
 	config.AddDefaultHeader("Authorization", bearer)
@@ -46,6 +50,7 @@ func NewClient(request ClientCreateRequest) *Client {
 			Description: "pinning service url to upload files to",
 		},
 	}
+	config.HTTPClient = request.httpClient
 
 	return &Client{client: openapi.NewAPIClient(config), ps: request.ps}
 }
