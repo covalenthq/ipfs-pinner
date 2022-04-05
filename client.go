@@ -262,7 +262,7 @@ func (c *Client) lsInternal(ctx context.Context, settings *lsSettings) (pinResul
 		return pinResults{}, err
 	}
 
-	return results, nil
+	return *results, nil
 }
 
 // TODO: We should probably make sure there are no duplicates sent
@@ -331,8 +331,10 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (PinSt
 		return nil, err
 	}
 
-	return &pinStatusObject{result}, nil
+	return &pinStatusObject{*result}, nil
 }
+
+func (c *Client)
 
 func (c *Client) GetStatusByID(ctx context.Context, pinID string) (PinStatusGetter, error) {
 	getter := c.client.PinsApi.PinsRequestidGet(ctx, pinID)
@@ -342,7 +344,7 @@ func (c *Client) GetStatusByID(ctx context.Context, pinID string) (PinStatusGett
 		return nil, err
 	}
 
-	return &pinStatusObject{result}, nil
+	return &pinStatusObject{*result}, nil
 }
 
 func (c *Client) DeleteByID(ctx context.Context, pinID string) error {
@@ -384,7 +386,7 @@ func (c *Client) Replace(ctx context.Context, pinID string, cid cid.Cid, opts ..
 		return nil, err
 	}
 
-	return &pinStatusObject{result}, nil
+	return &pinStatusObject{*result}, nil
 }
 
 func getCIDEncoder() multibase.Encoder {
