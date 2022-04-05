@@ -1,13 +1,13 @@
-package ipsa_extension
+package ipfs_pin_lib
 
 import (
 	"encoding/json"
 	"fmt"
 	"time"
 
+	openapi "github.com/covalenthq/ipfs-pin-lib/openapi"
 	cid "github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multiaddr"
-	openapi "github.com/sudeepdino008/ipsa-extension/openapi"
 )
 
 // PinataResponseGetter Getter for PinataResponse object

@@ -1,4 +1,4 @@
-module github.com/sudeepdino008/ipsa-extension
+module github.com/covalenthq/ipfs-pin-lib
 
 go 1.18
 

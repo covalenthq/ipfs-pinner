@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	pinclient "github.com/covalenthq/ipfs-pin-lib"
 	"github.com/ipfs/go-cid"
-	pinclient "github.com/sudeepdino008/ipsa-extension"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("pinata pin response is: %v\n", resp.String())
+	fmt.Printf("pinata pin response is: %s\n", resp.String())
 
 	//	ps1, err1 := c.Add(ctx)
 
@@ -108,7 +108,7 @@ func listPins(ctx context.Context, c *pinclient.Client) {
 }
 
 func createTempFileForUpload() *os.File {
-	f, err := os.CreateTemp(os.TempDir(), "ipsa_extension")
+	f, err := os.CreateTemp(os.TempDir(), "ipfs_pin_lib")
 	filepath := f.Name()
 	if err != nil {
 		panic(err)

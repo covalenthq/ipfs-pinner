@@ -1,4 +1,4 @@
-package ipsa_extension
+package ipfs_pin_lib
 
 type PinningService string
 

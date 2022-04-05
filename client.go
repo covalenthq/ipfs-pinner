@@ -1,4 +1,4 @@
-package ipsa_extension
+package ipfs_pin_lib
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	openapi "github.com/sudeepdino008/ipsa-extension/openapi"
+	openapi "github.com/covalenthq/ipfs-pin-lib/openapi"
 
 	"github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multiaddr"
