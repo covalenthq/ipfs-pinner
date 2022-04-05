@@ -7,6 +7,7 @@ import (
 
 	cid "github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multiaddr"
+	openapi "github.com/sudeepdino008/ipsa-extension/openapi"
 )
 
 // PinGetter Getter for Pin object
