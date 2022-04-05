@@ -31,8 +31,8 @@ func main() {
 
 	c := pinclient.NewClient(url, fileUploadUrl, key)
 
-	filepath := createTempFileForUpload()
-	resp, err := c.UploadFile(filepath)
+	file := createTempFileForUpload()
+	resp, err := c.UploadFile(ctx, file)
 	if err != nil {
 		panic(err)
 	}
@@ -108,6 +108,16 @@ func listPins(ctx context.Context, c *pinclient.Client) {
 
 func createTempFileForUpload() *os.File {
 	f, err := os.CreateTemp(os.TempDir(), "ipsa_extension")
+	filepath := f.Name()
+	if err != nil {
+		panic(err)
+	}
+
+	f.Write([]byte("bahbahdfdfeebahbahnginx"))
+	f.Sync()
+	f.Close()
+
+	f, err = os.Open(filepath)
 	if err != nil {
 		panic(err)
 	}

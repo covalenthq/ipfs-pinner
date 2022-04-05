@@ -78,7 +78,7 @@ All URIs are relative to *https://pinning-service.example.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*FilepinApi* | [**PinningPinFileToIPFSPost**](docs/FilepinApi.md#pinningpinfiletoipfspost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
+*FilepinApi* | [**FileUpload**](docs/FilepinApi.md#fileupload) | **Post** / | Upload file to IPFS
 *PinsApi* | [**PinsGet**](docs/PinsApi.md#pinsget) | **Get** /pins | List pin objects
 *PinsApi* | [**PinsPost**](docs/PinsApi.md#pinspost) | **Post** /pins | Add pin object
 *PinsApi* | [**PinsRequestidDelete**](docs/PinsApi.md#pinsrequestiddelete) | **Delete** /pins/{requestid} | Remove pin object
@@ -90,10 +90,10 @@ Class | Method | HTTP request | Description
 
  - [Failure](docs/Failure.md)
  - [FailureError](docs/FailureError.md)
+ - [InlineObject](docs/InlineObject.md)
  - [Pin](docs/Pin.md)
  - [PinResults](docs/PinResults.md)
  - [PinStatus](docs/PinStatus.md)
- - [PinataFilePinRequest](docs/PinataFilePinRequest.md)
  - [PinataMetadata](docs/PinataMetadata.md)
  - [PinataOptions](docs/PinataOptions.md)
  - [PinataResponse](docs/PinataResponse.md)

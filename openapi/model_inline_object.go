@@ -12,38 +12,39 @@ package openapi
 
 import (
 	"encoding/json"
+	"os"
 )
 
-// PinataFilePinRequest File upload for pinning request
-type PinataFilePinRequest struct {
+// InlineObject File upload for pinning request
+type InlineObject struct {
 	// file you're attempting to upload to pinata
-	File string `json:"file"`
+	File *os.File `json:"file"`
 	PinataOptions *PinataOptions `json:"pinataOptions,omitempty"`
 	PinataMetadata *PinataMetadata `json:"pinataMetadata,omitempty"`
 }
 
-// NewPinataFilePinRequest instantiates a new PinataFilePinRequest object
+// NewInlineObject instantiates a new InlineObject object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPinataFilePinRequest(file string) *PinataFilePinRequest {
-	this := PinataFilePinRequest{}
+func NewInlineObject(file *os.File) *InlineObject {
+	this := InlineObject{}
 	this.File = file
 	return &this
 }
 
-// NewPinataFilePinRequestWithDefaults instantiates a new PinataFilePinRequest object
+// NewInlineObjectWithDefaults instantiates a new InlineObject object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPinataFilePinRequestWithDefaults() *PinataFilePinRequest {
-	this := PinataFilePinRequest{}
+func NewInlineObjectWithDefaults() *InlineObject {
+	this := InlineObject{}
 	return &this
 }
 
 // GetFile returns the File field value
-func (o *PinataFilePinRequest) GetFile() string {
+func (o *InlineObject) GetFile() *os.File {
 	if o == nil {
-		var ret string
+		var ret *os.File
 		return ret
 	}
 
@@ -52,7 +53,7 @@ func (o *PinataFilePinRequest) GetFile() string {
 
 // GetFileOk returns a tuple with the File field value
 // and a boolean to check if the value has been set.
-func (o *PinataFilePinRequest) GetFileOk() (*string, bool) {
+func (o *InlineObject) GetFileOk() (**os.File, bool) {
 	if o == nil  {
 		return nil, false
 	}
@@ -60,12 +61,12 @@ func (o *PinataFilePinRequest) GetFileOk() (*string, bool) {
 }
 
 // SetFile sets field value
-func (o *PinataFilePinRequest) SetFile(v string) {
+func (o *InlineObject) SetFile(v *os.File) {
 	o.File = v
 }
 
 // GetPinataOptions returns the PinataOptions field value if set, zero value otherwise.
-func (o *PinataFilePinRequest) GetPinataOptions() PinataOptions {
+func (o *InlineObject) GetPinataOptions() PinataOptions {
 	if o == nil || o.PinataOptions == nil {
 		var ret PinataOptions
 		return ret
@@ -75,7 +76,7 @@ func (o *PinataFilePinRequest) GetPinataOptions() PinataOptions {
 
 // GetPinataOptionsOk returns a tuple with the PinataOptions field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PinataFilePinRequest) GetPinataOptionsOk() (*PinataOptions, bool) {
+func (o *InlineObject) GetPinataOptionsOk() (*PinataOptions, bool) {
 	if o == nil || o.PinataOptions == nil {
 		return nil, false
 	}
@@ -83,7 +84,7 @@ func (o *PinataFilePinRequest) GetPinataOptionsOk() (*PinataOptions, bool) {
 }
 
 // HasPinataOptions returns a boolean if a field has been set.
-func (o *PinataFilePinRequest) HasPinataOptions() bool {
+func (o *InlineObject) HasPinataOptions() bool {
 	if o != nil && o.PinataOptions != nil {
 		return true
 	}
@@ -92,12 +93,12 @@ func (o *PinataFilePinRequest) HasPinataOptions() bool {
 }
 
 // SetPinataOptions gets a reference to the given PinataOptions and assigns it to the PinataOptions field.
-func (o *PinataFilePinRequest) SetPinataOptions(v PinataOptions) {
+func (o *InlineObject) SetPinataOptions(v PinataOptions) {
 	o.PinataOptions = &v
 }
 
 // GetPinataMetadata returns the PinataMetadata field value if set, zero value otherwise.
-func (o *PinataFilePinRequest) GetPinataMetadata() PinataMetadata {
+func (o *InlineObject) GetPinataMetadata() PinataMetadata {
 	if o == nil || o.PinataMetadata == nil {
 		var ret PinataMetadata
 		return ret
@@ -107,7 +108,7 @@ func (o *PinataFilePinRequest) GetPinataMetadata() PinataMetadata {
 
 // GetPinataMetadataOk returns a tuple with the PinataMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PinataFilePinRequest) GetPinataMetadataOk() (*PinataMetadata, bool) {
+func (o *InlineObject) GetPinataMetadataOk() (*PinataMetadata, bool) {
 	if o == nil || o.PinataMetadata == nil {
 		return nil, false
 	}
@@ -115,7 +116,7 @@ func (o *PinataFilePinRequest) GetPinataMetadataOk() (*PinataMetadata, bool) {
 }
 
 // HasPinataMetadata returns a boolean if a field has been set.
-func (o *PinataFilePinRequest) HasPinataMetadata() bool {
+func (o *InlineObject) HasPinataMetadata() bool {
 	if o != nil && o.PinataMetadata != nil {
 		return true
 	}
@@ -124,11 +125,11 @@ func (o *PinataFilePinRequest) HasPinataMetadata() bool {
 }
 
 // SetPinataMetadata gets a reference to the given PinataMetadata and assigns it to the PinataMetadata field.
-func (o *PinataFilePinRequest) SetPinataMetadata(v PinataMetadata) {
+func (o *InlineObject) SetPinataMetadata(v PinataMetadata) {
 	o.PinataMetadata = &v
 }
 
-func (o PinataFilePinRequest) MarshalJSON() ([]byte, error) {
+func (o InlineObject) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if true {
 		toSerialize["file"] = o.File
@@ -142,38 +143,38 @@ func (o PinataFilePinRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-type NullablePinataFilePinRequest struct {
-	value *PinataFilePinRequest
+type NullableInlineObject struct {
+	value *InlineObject
 	isSet bool
 }
 
-func (v NullablePinataFilePinRequest) Get() *PinataFilePinRequest {
+func (v NullableInlineObject) Get() *InlineObject {
 	return v.value
 }
 
-func (v *NullablePinataFilePinRequest) Set(val *PinataFilePinRequest) {
+func (v *NullableInlineObject) Set(val *InlineObject) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePinataFilePinRequest) IsSet() bool {
+func (v NullableInlineObject) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePinataFilePinRequest) Unset() {
+func (v *NullableInlineObject) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePinataFilePinRequest(val *PinataFilePinRequest) *NullablePinataFilePinRequest {
-	return &NullablePinataFilePinRequest{value: val, isSet: true}
+func NewNullableInlineObject(val *InlineObject) *NullableInlineObject {
+	return &NullableInlineObject{value: val, isSet: true}
 }
 
-func (v NullablePinataFilePinRequest) MarshalJSON() ([]byte, error) {
+func (v NullableInlineObject) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePinataFilePinRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableInlineObject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

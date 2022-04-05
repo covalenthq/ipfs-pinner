@@ -16,6 +16,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
+	
+	"fmt"
+	"sort"
+	"strings"
 )
 
 // Linger please
@@ -26,31 +31,42 @@ var (
 // FilepinApiService FilepinApi service
 type FilepinApiService service
 
-type ApiPinningPinFileToIPFSPostRequest struct {
+type ApiFileUploadRequest struct {
 	ctx context.Context
 	ApiService *FilepinApiService
-	pinataFilePinRequest *PinataFilePinRequest
+	file **os.File
+	pinataOptions *PinataOptions
+	pinataMetadata *PinataMetadata
 }
 
-func (r ApiPinningPinFileToIPFSPostRequest) PinataFilePinRequest(pinataFilePinRequest PinataFilePinRequest) ApiPinningPinFileToIPFSPostRequest {
-	r.pinataFilePinRequest = &pinataFilePinRequest
+// file you&#39;re attempting to upload to pinata
+func (r ApiFileUploadRequest) File(file *os.File) ApiFileUploadRequest {
+	r.file = &file
+	return r
+}
+func (r ApiFileUploadRequest) PinataOptions(pinataOptions PinataOptions) ApiFileUploadRequest {
+	r.pinataOptions = &pinataOptions
+	return r
+}
+func (r ApiFileUploadRequest) PinataMetadata(pinataMetadata PinataMetadata) ApiFileUploadRequest {
+	r.pinataMetadata = &pinataMetadata
 	return r
 }
 
-func (r ApiPinningPinFileToIPFSPostRequest) Execute() (*PinataResponse, *http.Response, error) {
-	return r.ApiService.PinningPinFileToIPFSPostExecute(r)
+func (r ApiFileUploadRequest) Execute() (*PinataResponse, *http.Response, error) {
+	return r.ApiService.FileUploadExecute(r)
 }
 
 /*
-PinningPinFileToIPFSPost Upload file to IPFS
+FileUpload Upload file to IPFS
 
 pinata services' upload file to ipfs option
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiPinningPinFileToIPFSPostRequest
+ @return ApiFileUploadRequest
 */
-func (a *FilepinApiService) PinningPinFileToIPFSPost(ctx context.Context) ApiPinningPinFileToIPFSPostRequest {
-	return ApiPinningPinFileToIPFSPostRequest{
+func (a *FilepinApiService) FileUpload(ctx context.Context) ApiFileUploadRequest {
+	return ApiFileUploadRequest{
 		ApiService: a,
 		ctx: ctx,
 	}
@@ -58,7 +74,7 @@ func (a *FilepinApiService) PinningPinFileToIPFSPost(ctx context.Context) ApiPin
 
 // Execute executes the request
 //  @return PinataResponse
-func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileToIPFSPostRequest) (*PinataResponse, *http.Response, error) {
+func (a *FilepinApiService) FileUploadExecute(r ApiFileUploadRequest) (*PinataResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -66,22 +82,22 @@ func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileT
 		localVarReturnValue  *PinataResponse
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.PinningPinFileToIPFSPost")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.FileUpload")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/pinning/pinFileToIPFS"
+	localVarPath := localBasePath + "/"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.pinataFilePinRequest == nil {
-		return localVarReturnValue, nil, reportError("pinataFilePinRequest is required and must be specified")
+	if r.file == nil {
+		return localVarReturnValue, nil, reportError("file is required and must be specified")
 	}
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
+	localVarHTTPContentTypes := []string{"multipart/form-data"}
 
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
@@ -97,13 +113,41 @@ func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileT
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	// body params
-	localVarPostBody = r.pinataFilePinRequest
+	var fileLocalVarFormFileName string
+	var fileLocalVarFileName     string
+	var fileLocalVarFileBytes    []byte
+
+	fileLocalVarFormFileName = "file"
+
+	fileLocalVarFile := *r.file
+	if fileLocalVarFile != nil {
+		fbs, _ := ioutil.ReadAll(fileLocalVarFile)
+		fileLocalVarFileBytes = fbs
+		fileLocalVarFileName = fileLocalVarFile.Name()
+		fileLocalVarFile.Close()
+	}
+	formFiles = append(formFiles, formFile{fileBytes: fileLocalVarFileBytes, fileName: fileLocalVarFileName, formFileName: fileLocalVarFormFileName})
+	if r.pinataOptions != nil {
+		paramJson, err := parameterToJson(*r.pinataOptions)
+		if err != nil {
+			return localVarReturnValue, nil, err
+		}
+		localVarFormParams.Add("pinataOptions", paramJson)
+	}
+	if r.pinataMetadata != nil {
+		paramJson, err := parameterToJson(*r.pinataMetadata)
+		if err != nil {
+			return localVarReturnValue, nil, err
+		}
+		localVarFormParams.Add("pinataMetadata", paramJson)
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
 	}
 
+	command, _ := GetCurlCommand(req)
+    fmt.Println(command)
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarHTTPResponse, err
@@ -193,4 +237,79 @@ func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileT
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+
+
+// CurlCommand contains exec.Command compatible slice + helpers
+type CurlCommand []string
+
+// append appends a string to the CurlCommand
+func (c *CurlCommand) append(newSlice ...string) {
+	*c = append(*c, newSlice...)
+}
+
+// String returns a ready to copy/paste command
+func (c *CurlCommand) String() string {
+	return strings.Join(*c, " ")
+}
+
+func bashEscape(str string) string {
+	return `'` + strings.Replace(str, `'`, `'\''`, -1) + `'`
+}
+
+// GetCurlCommand returns a CurlCommand corresponding to an http.Request
+func GetCurlCommand(req *http.Request) (*CurlCommand, error) {
+	if req.URL == nil {
+		return nil, fmt.Errorf("getCurlCommand: invalid request, req.URL is nil")
+	}
+
+	command := CurlCommand{}
+
+	command.append("curl")
+
+	schema := req.URL.Scheme
+	requestURL := req.URL.String()
+	if schema == "" {
+		schema = "http"
+		if req.TLS != nil {
+			schema = "https"
+		}
+		requestURL = schema + "://" + req.Host + req.URL.Path
+	}
+
+	if schema == "https" {
+		command.append("-k")
+	}
+
+	command.append("-X", bashEscape(req.Method))
+
+	if req.Body != nil {
+		var buff bytes.Buffer
+		_, err := buff.ReadFrom(req.Body)
+		if err != nil {
+			return nil, fmt.Errorf("getCurlCommand: buffer read from body error: %w", err)
+		}
+		// reset body for potential re-reads
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(buff.Bytes()))
+		if len(buff.String()) > 0 {
+			bodyEscaped := bashEscape(buff.String())
+			command.append("-d", bodyEscaped)
+		}
+	}
+
+	var keys []string
+
+	for k := range req.Header {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		command.append("-H", bashEscape(fmt.Sprintf("%s: %s", k, strings.Join(req.Header[k], " "))))
+	}
+
+	command.append(bashEscape(requestURL))
+
+	return &command, nil
 }

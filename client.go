@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	openapi "github.com/sudeepdino008/ipsa-extension/openapi"
@@ -334,9 +335,15 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (PinSt
 	return &pinStatusObject{*result}, nil
 }
 
-func (c *Client) UploadFile(ctx context.Context, filepath string) (PinataResponseGetter, error) {
-	poster := c.client.FilepinApi.PinningPinFileToIPFSPost(ctx)
-	result, httpresp, err := poster.PinataFilePinRequest(openapi.PinataFilePinRequest{File: filepath}).Execute()
+func (c *Client) UploadFile(ctx context.Context, file *os.File) (PinataResponseGetter, error) {
+	ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1)  // assuming index = 1 is the file uploader url
+	poster := c.client.FilepinApi.FileUpload(ctx)
+	meta := openapi.NewPinataMetadata()
+	meta.SetName("firstup")
+	opt := openapi.NewPinataOptions()
+	opt.SetCidVersion("1")
+
+	result, httpresp, err := poster.PinataMetadata(*meta).PinataOptions(*opt).File(file).Execute()
 	if err != nil {
 		err := httperr(httpresp, err)
 		return nil, err

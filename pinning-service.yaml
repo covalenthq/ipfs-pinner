@@ -10,6 +10,7 @@ servers:
   - url: https://pinning-service.example.com
 
 paths:
+   #IPFS pinning service API spec endpoints (start)
   /pins:      #paths object
     get:      #paths item object (nested within is the operation object)
       summary: List pin objects
@@ -156,19 +157,42 @@ paths:
           $ref: '#/components/responses/CustomServiceError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
+  
+  #IPFS pinning service API spec endpoints (end)
 
-  /pinning/pinFileToIPFS:
+  # complete file pin api path (start)
+  /:
     post:
       summary: Upload file to IPFS
       description: pinata services' upload file to ipfs option
+      operationId: fileUpload
       tags:
         - filepin
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PinataFilePinRequest'
+              description: File upload for pinning request
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  description: file you're attempting to upload to pinata
+                  type: string
+                  format: binary
+                pinataOptions:
+                  $ref: '#/components/schemas/PinataOptions'
+                pinataMetadata:
+                  $ref: '#/components/schemas/PinataMetadata'
+
+            encoding:
+              pinataOptions:
+                contentType: application/json
+              pinataMetadata:
+                contentType: application/json
+
       responses:
         '200':
           description: Successful response (with IPFS hash)
@@ -188,7 +212,7 @@ paths:
           $ref: '#/components/responses/CustomServiceError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-
+  # complete file pin api path (start)
 
 components:
   schemas:
@@ -342,19 +366,19 @@ components:
               description: Optional, longer description of the error; may include UUID of transaction for support, links to documentation etc
               example: "Optional explanation for humans with more details"
 
-    PinataFilePinRequest:
-      description: File upload for pinning request
-      type: object
-      required:
-        - file
-      properties:
-        file:
-          description: file you're attempting to upload to pinata
-          type: string
-        pinataOptions:
-          $ref: '#/components/schemas/PinataOptions'
-        pinataMetadata:
-          $ref: '#/components/schemas/PinataMetadata'
+    # PinataFilePinRequest:
+    #   description: File upload for pinning request
+    #   type: object
+    #   required:
+    #     - file
+    #   properties:
+    #     file:
+    #       description: file you're attempting to upload to pinata
+    #       type: binary
+    #     pinataOptions:
+    #       $ref: '#/components/schemas/PinataOptions'
+    #     pinataMetadata:
+    #       $ref: '#/components/schemas/PinataMetadata'
 
     PinataResponse:
       description: response back to file pin request
@@ -368,7 +392,7 @@ components:
           type: integer
         Timestamp:
           description: This is the timestamp for your content pinning (represented in ISO 8601 format)
-          type: date   #can also be date-time (test!)
+          type: string   #can also be date-time (test!)
     
     PinataOptions:
       type: object

@@ -4,13 +4,13 @@ All URIs are relative to *https://pinning-service.example.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**PinningPinFileToIPFSPost**](FilepinApi.md#PinningPinFileToIPFSPost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
+[**FileUpload**](FilepinApi.md#FileUpload) | **Post** / | Upload file to IPFS
 
 
 
-## PinningPinFileToIPFSPost
+## FileUpload
 
-> PinataResponse PinningPinFileToIPFSPost(ctx).PinataFilePinRequest(pinataFilePinRequest).Execute()
+> PinataResponse FileUpload(ctx).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
 
 Upload file to IPFS
 
@@ -29,17 +29,19 @@ import (
 )
 
 func main() {
-    pinataFilePinRequest := *openapiclient.NewPinataFilePinRequest("File_example") // PinataFilePinRequest | 
+    file := os.NewFile(1234, "some_file") // *os.File | file you're attempting to upload to pinata
+    pinataOptions := *openapiclient.NewPinataOptions() // PinataOptions |  (optional)
+    pinataMetadata := *openapiclient.NewPinataMetadata() // PinataMetadata |  (optional)
 
     configuration := openapiclient.NewConfiguration()
     apiClient := openapiclient.NewAPIClient(configuration)
-    resp, r, err := apiClient.FilepinApi.PinningPinFileToIPFSPost(context.Background()).PinataFilePinRequest(pinataFilePinRequest).Execute()
+    resp, r, err := apiClient.FilepinApi.FileUpload(context.Background()).File(file).PinataOptions(pinataOptions).PinataMetadata(pinataMetadata).Execute()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error when calling `FilepinApi.PinningPinFileToIPFSPost``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Error when calling `FilepinApi.FileUpload``: %v\n", err)
         fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
     }
-    // response from `PinningPinFileToIPFSPost`: PinataResponse
-    fmt.Fprintf(os.Stdout, "Response from `FilepinApi.PinningPinFileToIPFSPost`: %v\n", resp)
+    // response from `FileUpload`: PinataResponse
+    fmt.Fprintf(os.Stdout, "Response from `FilepinApi.FileUpload`: %v\n", resp)
 }
 ```
 
@@ -49,12 +51,14 @@ func main() {
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiPinningPinFileToIPFSPostRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFileUploadRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **pinataFilePinRequest** | [**PinataFilePinRequest**](PinataFilePinRequest.md) |  | 
+ **file** | ***os.File** | file you&#39;re attempting to upload to pinata | 
+ **pinataOptions** | [**PinataOptions**](PinataOptions.md) |  | 
+ **pinataMetadata** | [**PinataMetadata**](PinataMetadata.md) |  | 
 
 ### Return type
 
@@ -66,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
-- **Content-Type**: application/json
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

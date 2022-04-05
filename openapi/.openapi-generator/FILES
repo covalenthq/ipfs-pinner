@@ -10,10 +10,10 @@ configuration.go
 docs/Failure.md
 docs/FailureError.md
 docs/FilepinApi.md
+docs/InlineObject.md
 docs/Pin.md
 docs/PinResults.md
 docs/PinStatus.md
-docs/PinataFilePinRequest.md
 docs/PinataMetadata.md
 docs/PinataOptions.md
 docs/PinataResponse.md
@@ -25,10 +25,10 @@ go.mod
 go.sum
 model_failure.go
 model_failure_error.go
+model_inline_object.go
 model_pin.go
 model_pin_results.go
 model_pin_status.go
-model_pinata_file_pin_request.go
 model_pinata_metadata.go
 model_pinata_options.go
 model_pinata_response.go

@@ -480,14 +480,35 @@ paths:
       summary: Replace pin object
       tags:
       - pins
-  /pinning/pinFileToIPFS:
+  /:
     post:
       description: pinata services' upload file to ipfs option
+      operationId: fileUpload
       requestBody:
+        $ref: '#/components/requestBodies/inline_object'
         content:
-          application/json:
+          multipart/form-data:
+            encoding:
+              pinataOptions:
+                contentType: application/json
+                style: form
+              pinataMetadata:
+                contentType: application/json
+                style: form
             schema:
-              $ref: '#/components/schemas/PinataFilePinRequest'
+              description: File upload for pinning request
+              properties:
+                file:
+                  description: file you're attempting to upload to pinata
+                  format: binary
+                  type: string
+                pinataOptions:
+                  $ref: '#/components/schemas/PinataOptions'
+                pinataMetadata:
+                  $ref: '#/components/schemas/PinataMetadata'
+              required:
+              - file
+              type: object
         required: true
       responses:
         "200":
@@ -702,6 +723,13 @@ components:
       name: meta
       required: false
       style: form
+  requestBodies:
+    inline_object:
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/inline_object'
+      required: true
   responses:
     BadRequest:
       content:
@@ -1021,34 +1049,12 @@ components:
       required:
       - error
       type: object
-    PinataFilePinRequest:
-      description: File upload for pinning request
-      example:
-        file: file
-        pinataMetadata:
-          name: name
-          keyvalues:
-            key: keyvalues
-        pinataOptions:
-          cidVersion: "0"
-          wrapWithDirectory: true
-      properties:
-        file:
-          description: file you're attempting to upload to pinata
-          type: string
-        pinataOptions:
-          $ref: '#/components/schemas/PinataOptions'
-        pinataMetadata:
-          $ref: '#/components/schemas/PinataMetadata'
-      required:
-      - file
-      type: object
     PinataResponse:
       description: response back to file pin request
       example:
         PinSize: 0
         IpfsHash: IpfsHash
-        Timestamp: ""
+        Timestamp: Timestamp
       properties:
         IpfsHash:
           description: This is the IPFS multi-hash provided back for your content
@@ -1059,12 +1065,9 @@ components:
         Timestamp:
           description: This is the timestamp for your content pinning (represented
             in ISO 8601 format)
-          type: date
+          type: string
       type: object
     PinataOptions:
-      example:
-        cidVersion: "0"
-        wrapWithDirectory: true
       properties:
         cidVersion:
           description: CID version IPFS will use when creating a hash for your content
@@ -1077,10 +1080,6 @@ components:
           type: boolean
       type: object
     PinataMetadata:
-      example:
-        name: name
-        keyvalues:
-          key: keyvalues
       properties:
         name:
           description: "null"
@@ -1089,6 +1088,20 @@ components:
           additionalProperties:
             type: string
           type: object
+      type: object
+    inline_object:
+      description: File upload for pinning request
+      properties:
+        file:
+          description: file you're attempting to upload to pinata
+          format: binary
+          type: string
+        pinataOptions:
+          $ref: '#/components/schemas/PinataOptions'
+        pinataMetadata:
+          $ref: '#/components/schemas/PinataMetadata'
+      required:
+      - file
       type: object
     Failure_error:
       properties:

@@ -24,12 +24,12 @@ type pinataResponseObject struct {
 }
 
 func (pro *pinataResponseObject) GetCid() cid.Cid {
-	cid, err := cid.Parse(pro.IpfsHash)
+	c, err := cid.Parse(pro.IpfsHash)
 	if err != nil {
 		return cid.Undef
 	}
 
-	return cid
+	return c
 }
 
 func (pro *pinataResponseObject) GetPinSize() int32 {
