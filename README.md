@@ -1,2 +1,2 @@
 # ipfs-pin-lib
-IPFS pinning service api go client + custom file pinning support for pinata, web3.storage etc.
+go client for IPFS pinning service api with extended support for custom file pinning endpoints (pinata, web3.storage etc.)
