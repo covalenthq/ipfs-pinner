@@ -1,0 +1,1112 @@
+openapi: 3.0.3
+info:
+  description: some notes
+  title: IPFS Pinning Service API
+  version: 1.0.0
+  x-logo:
+    url: https://bafybeidehxarrk54mkgyl5yxbgjzqilp6tkaz2or36jhq24n3rdtuven54.ipfs.dweb.link/?filename=ipfs-pinning-service.svg
+servers:
+- url: https://pinning-service.example.com
+security:
+- accessToken: []
+paths:
+  /pins:
+    get:
+      description: List all the pin objects, matching optional filters; when no filter
+        is provided, only successful pins are returned
+      parameters:
+      - description: Return pin objects responsible for pinning the specified CID(s);
+          be aware that using longer hash functions introduces further constraints
+          on the number of CIDs that will fit under the limit of 2000 characters per
+          URL  in browser contexts
+        example:
+        - Qm1
+        - Qm2
+        - bafy3
+        explode: false
+        in: query
+        name: cid
+        required: false
+        schema:
+          items:
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+          uniqueItems: true
+        style: form
+      - description: Return pin objects with specified name (by default a case-sensitive,
+          exact match)
+        example: PreciousData.pdf
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          maxLength: 255
+          type: string
+        style: form
+      - description: Customize the text matching strategy applied when the name filter
+          is present; exact (the default) is a case-sensitive exact match, partial
+          matches anywhere in the name, iexact and ipartial are case-insensitive versions
+          of the exact and partial strategies
+        example: exact
+        explode: true
+        in: query
+        name: match
+        required: false
+        schema:
+          $ref: '#/components/schemas/TextMatchingStrategy'
+        style: form
+      - description: Return pin objects for pins with the specified status
+        example:
+        - queued
+        - pinning
+        explode: false
+        in: query
+        name: status
+        required: false
+        schema:
+          items:
+            $ref: '#/components/schemas/Status'
+          minItems: 1
+          type: array
+          uniqueItems: true
+        style: form
+      - description: Return results created (queued) before provided timestamp
+        example: 2020-07-27T17:32:28Z
+        explode: true
+        in: query
+        name: before
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Return results created (queued) after provided timestamp
+        example: 2020-07-27T17:32:28Z
+        explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: Max records to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          format: int32
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinMeta'
+        description: Return pin objects that match specified metadata keys passed
+          as a string representation of a JSON object; when implementing a client
+          library, make sure the parameter is URL-encoded to ensure safe transport
+        explode: true
+        in: query
+        name: meta
+        required: false
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinResults'
+          description: Successful response (PinResults object)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: List pin objects
+      tags:
+      - pins
+    post:
+      description: Add a new pin object for the current access token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pin'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinStatus'
+          description: Successful response (PinStatus object)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: Add pin object
+      tags:
+      - pins
+  /pins/{requestid}:
+    delete:
+      description: Remove a pin object
+      parameters:
+      - explode: false
+        in: path
+        name: requestid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Successful response (no body, pin removed)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: Remove pin object
+      tags:
+      - pins
+    get:
+      description: Get a pin object and its status
+      parameters:
+      - explode: false
+        in: path
+        name: requestid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinStatus'
+          description: Successful response (PinStatus object)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: Get pin object
+      tags:
+      - pins
+    post:
+      description: Replace an existing pin object (shortcut for executing remove and
+        add operations in one step to avoid unnecessary garbage collection of blocks
+        present in both recursive pins)
+      parameters:
+      - explode: false
+        in: path
+        name: requestid
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pin'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinStatus'
+          description: Successful response (PinStatus object)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: Replace pin object
+      tags:
+      - pins
+  /pinning/pinFileToIPFS:
+    post:
+      description: pinata services' upload file to ipfs option
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinataFilePinRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinataResponse'
+          description: Successful response (with IPFS hash)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "404":
+          content:
+            application/json:
+              examples:
+                NotFoundExample:
+                  $ref: '#/components/examples/NotFoundExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (The specified resource was not found)
+        "409":
+          content:
+            application/json:
+              examples:
+                InsufficientFundsExample:
+                  $ref: '#/components/examples/InsufficientFundsExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Insufficient funds)
+        "4XX":
+          content:
+            application/json:
+              examples:
+                CustomServiceErrorExample:
+                  $ref: '#/components/examples/CustomServiceErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Custom service error)
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      summary: Upload file to IPFS
+components:
+  examples:
+    BadRequestExample:
+      summary: A sample response to a bad request; reason will differ
+      value:
+        error:
+          reason: BAD_REQUEST
+          details: Explanation for humans with more details
+    UnauthorizedExample:
+      summary: Response to an unauthorized request
+      value:
+        error:
+          reason: UNAUTHORIZED
+          details: Access token is missing or invalid
+    NotFoundExample:
+      summary: Response to a request for a resource that does not exist
+      value:
+        error:
+          reason: NOT_FOUND
+          details: The specified resource was not found
+    InsufficientFundsExample:
+      summary: Response when access token run out of funds
+      value:
+        error:
+          reason: INSUFFICIENT_FUNDS
+          details: Unable to process request due to the lack of funds
+    CustomServiceErrorExample:
+      summary: Response when a custom error occured
+      value:
+        error:
+          reason: CUSTOM_ERROR_CODE_FOR_MACHINES
+          details: Optional explanation for humans with more details
+    InternalServerErrorExample:
+      summary: Response when unexpected error occured
+      value:
+        error:
+          reason: INTERNAL_SERVER_ERROR
+          details: Explanation for humans with more details
+  parameters:
+    before:
+      description: Return results created (queued) before provided timestamp
+      example: 2020-07-27T17:32:28Z
+      explode: true
+      in: query
+      name: before
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
+    after:
+      description: Return results created (queued) after provided timestamp
+      example: 2020-07-27T17:32:28Z
+      explode: true
+      in: query
+      name: after
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
+    limit:
+      description: Max records to return
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 10
+        format: int32
+        maximum: 1000
+        minimum: 1
+        type: integer
+      style: form
+    cid:
+      description: Return pin objects responsible for pinning the specified CID(s);
+        be aware that using longer hash functions introduces further constraints on
+        the number of CIDs that will fit under the limit of 2000 characters per URL  in
+        browser contexts
+      example:
+      - Qm1
+      - Qm2
+      - bafy3
+      explode: false
+      in: query
+      name: cid
+      required: false
+      schema:
+        items:
+          type: string
+        maxItems: 10
+        minItems: 1
+        type: array
+        uniqueItems: true
+      style: form
+    name:
+      description: Return pin objects with specified name (by default a case-sensitive,
+        exact match)
+      example: PreciousData.pdf
+      explode: true
+      in: query
+      name: name
+      required: false
+      schema:
+        maxLength: 255
+        type: string
+      style: form
+    match:
+      description: Customize the text matching strategy applied when the name filter
+        is present; exact (the default) is a case-sensitive exact match, partial matches
+        anywhere in the name, iexact and ipartial are case-insensitive versions of
+        the exact and partial strategies
+      example: exact
+      explode: true
+      in: query
+      name: match
+      required: false
+      schema:
+        $ref: '#/components/schemas/TextMatchingStrategy'
+      style: form
+    status:
+      description: Return pin objects for pins with the specified status
+      example:
+      - queued
+      - pinning
+      explode: false
+      in: query
+      name: status
+      required: false
+      schema:
+        items:
+          $ref: '#/components/schemas/Status'
+        minItems: 1
+        type: array
+        uniqueItems: true
+      style: form
+    meta:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PinMeta'
+      description: Return pin objects that match specified metadata keys passed as
+        a string representation of a JSON object; when implementing a client library,
+        make sure the parameter is URL-encoded to ensure safe transport
+      explode: true
+      in: query
+      name: meta
+      required: false
+      style: form
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (Bad request)
+    Unauthorized:
+      content:
+        application/json:
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (Unauthorized; access token is missing or invalid)
+    NotFound:
+      content:
+        application/json:
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (The specified resource was not found)
+    InsufficientFunds:
+      content:
+        application/json:
+          examples:
+            InsufficientFundsExample:
+              $ref: '#/components/examples/InsufficientFundsExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (Insufficient funds)
+    CustomServiceError:
+      content:
+        application/json:
+          examples:
+            CustomServiceErrorExample:
+              $ref: '#/components/examples/CustomServiceErrorExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (Custom service error)
+    InternalServerError:
+      content:
+        application/json:
+          examples:
+            InternalServerErrorExample:
+              $ref: '#/components/examples/InternalServerErrorExample'
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response (Unexpected internal server error)
+  schemas:
+    PinResults:
+      description: Response used for listing pin objects matching request
+      example:
+        count: 1
+        results:
+        - pin:
+            meta:
+              app_id: 99986338-1113-4706-8302-4420da6158aa
+            name: PreciousData.pdf
+            origins:
+            - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+            - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+            cid: QmCIDToBePinned
+          requestid: UniqueIdOfPinRequest
+          created: 2020-07-27T17:32:28Z
+          delegates:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          info:
+            status_details: 'Queue position: 7 of 9'
+        - pin:
+            meta:
+              app_id: 99986338-1113-4706-8302-4420da6158aa
+            name: PreciousData.pdf
+            origins:
+            - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+            - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+            cid: QmCIDToBePinned
+          requestid: UniqueIdOfPinRequest
+          created: 2020-07-27T17:32:28Z
+          delegates:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          info:
+            status_details: 'Queue position: 7 of 9'
+        - pin:
+            meta:
+              app_id: 99986338-1113-4706-8302-4420da6158aa
+            name: PreciousData.pdf
+            origins:
+            - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+            - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+            cid: QmCIDToBePinned
+          requestid: UniqueIdOfPinRequest
+          created: 2020-07-27T17:32:28Z
+          delegates:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          info:
+            status_details: 'Queue position: 7 of 9'
+        - pin:
+            meta:
+              app_id: 99986338-1113-4706-8302-4420da6158aa
+            name: PreciousData.pdf
+            origins:
+            - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+            - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+            cid: QmCIDToBePinned
+          requestid: UniqueIdOfPinRequest
+          created: 2020-07-27T17:32:28Z
+          delegates:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          info:
+            status_details: 'Queue position: 7 of 9'
+        - pin:
+            meta:
+              app_id: 99986338-1113-4706-8302-4420da6158aa
+            name: PreciousData.pdf
+            origins:
+            - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+            - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+            cid: QmCIDToBePinned
+          requestid: UniqueIdOfPinRequest
+          created: 2020-07-27T17:32:28Z
+          delegates:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          info:
+            status_details: 'Queue position: 7 of 9'
+      properties:
+        count:
+          description: The total number of pin objects that exist for passed query
+            filters
+          example: 1
+          format: int32
+          minimum: 0
+          type: integer
+        results:
+          description: An array of PinStatus results
+          items:
+            $ref: '#/components/schemas/PinStatus'
+          maxItems: 1000
+          minItems: 0
+          type: array
+          uniqueItems: true
+      required:
+      - count
+      - results
+      type: object
+    PinStatus:
+      description: Pin object with status
+      example:
+        pin:
+          meta:
+            app_id: 99986338-1113-4706-8302-4420da6158aa
+          name: PreciousData.pdf
+          origins:
+          - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+          - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+          cid: QmCIDToBePinned
+        requestid: UniqueIdOfPinRequest
+        created: 2020-07-27T17:32:28Z
+        delegates:
+        - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+        info:
+          status_details: 'Queue position: 7 of 9'
+      properties:
+        requestid:
+          description: Globally unique identifier of the pin request; can be used
+            to check the status of ongoing pinning, or pin removal
+          example: UniqueIdOfPinRequest
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        created:
+          description: Immutable timestamp indicating when a pin request entered a
+            pinning service; can be used for filtering results and pagination
+          example: 2020-07-27T17:32:28Z
+          format: date-time
+          type: string
+        pin:
+          $ref: '#/components/schemas/Pin'
+        delegates:
+          description: List of multiaddrs designated by pinning service for transferring
+            any new data from external peers
+          example:
+          - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+          items:
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+          uniqueItems: true
+        info:
+          additionalProperties:
+            maxProperties: 1000
+            minProperties: 0
+            type: string
+          description: Optional info for PinStatus response
+          example:
+            status_details: 'Queue position: 7 of 9'
+          type: object
+      required:
+      - created
+      - delegates
+      - pin
+      - requestid
+      - status
+      type: object
+    Pin:
+      description: Pin object
+      example:
+        meta:
+          app_id: 99986338-1113-4706-8302-4420da6158aa
+        name: PreciousData.pdf
+        origins:
+        - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+        - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+        cid: QmCIDToBePinned
+      properties:
+        cid:
+          description: Content Identifier (CID) to be pinned recursively
+          example: QmCIDToBePinned
+          type: string
+        name:
+          description: Optional name for pinned data; can be used for lookups later
+          example: PreciousData.pdf
+          maxLength: 255
+          type: string
+        origins:
+          description: Optional list of multiaddrs known to provide the data
+          example:
+          - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+          - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+          items:
+            type: string
+          maxItems: 20
+          minItems: 0
+          type: array
+          uniqueItems: true
+        meta:
+          additionalProperties:
+            maxProperties: 1000
+            minProperties: 0
+            type: string
+          description: Optional metadata for pin object
+          example:
+            app_id: 99986338-1113-4706-8302-4420da6158aa
+          type: object
+      required:
+      - cid
+      type: object
+    Status:
+      description: Status a pin object can have at a pinning service
+      enum:
+      - queued
+      - pinning
+      - pinned
+      - failed
+      type: string
+    Delegates:
+      description: List of multiaddrs designated by pinning service for transferring
+        any new data from external peers
+      example:
+      - /ip4/203.0.113.1/tcp/4001/p2p/QmServicePeerId
+      items:
+        type: string
+      maxItems: 20
+      minItems: 1
+      type: array
+      uniqueItems: true
+    Origins:
+      description: Optional list of multiaddrs known to provide the data
+      example:
+      - /ip4/203.0.113.142/tcp/4001/p2p/QmSourcePeerId
+      - /ip4/203.0.113.114/udp/4001/quic/p2p/QmSourcePeerId
+      items:
+        type: string
+      maxItems: 20
+      minItems: 0
+      type: array
+      uniqueItems: true
+    PinMeta:
+      additionalProperties:
+        maxProperties: 1000
+        minProperties: 0
+        type: string
+      description: Optional metadata for pin object
+      example:
+        app_id: 99986338-1113-4706-8302-4420da6158aa
+      type: object
+    StatusInfo:
+      additionalProperties:
+        maxProperties: 1000
+        minProperties: 0
+        type: string
+      description: Optional info for PinStatus response
+      example:
+        status_details: 'Queue position: 7 of 9'
+      type: object
+    TextMatchingStrategy:
+      default: exact
+      description: Alternative text matching strategy
+      enum:
+      - exact
+      - iexact
+      - partial
+      - ipartial
+      type: string
+    Failure:
+      description: Response for a failed request
+      properties:
+        error:
+          $ref: '#/components/schemas/Failure_error'
+      required:
+      - error
+      type: object
+    PinataFilePinRequest:
+      description: File upload for pinning request
+      example:
+        file: file
+        pinataMetadata:
+          name: name
+          keyvalues:
+            key: keyvalues
+        pinataOptions:
+          cidVersion: "0"
+          wrapWithDirectory: true
+      properties:
+        file:
+          description: file you're attempting to upload to pinata
+          type: string
+        pinataOptions:
+          $ref: '#/components/schemas/PinataOptions'
+        pinataMetadata:
+          $ref: '#/components/schemas/PinataMetadata'
+      required:
+      - file
+      type: object
+    PinataResponse:
+      description: response back to file pin request
+      example:
+        PinSize: 0
+        IpfsHash: IpfsHash
+        Timestamp: ""
+      properties:
+        IpfsHash:
+          description: This is the IPFS multi-hash provided back for your content
+          type: string
+        PinSize:
+          description: This is how large (in bytes) the content you just pinned is
+          type: integer
+        Timestamp:
+          description: This is the timestamp for your content pinning (represented
+            in ISO 8601 format)
+          type: date
+      type: object
+    PinataOptions:
+      example:
+        cidVersion: "0"
+        wrapWithDirectory: true
+      properties:
+        cidVersion:
+          description: CID version IPFS will use when creating a hash for your content
+          enum:
+          - "0"
+          - "1"
+          type: string
+        wrapWithDirectory:
+          description: Wrap your content inside of a directory when adding to IPFS.
+          type: boolean
+      type: object
+    PinataMetadata:
+      example:
+        name: name
+        keyvalues:
+          key: keyvalues
+      properties:
+        name:
+          description: "null"
+          type: string
+        keyvalues:
+          additionalProperties:
+            type: string
+          type: object
+      type: object
+    Failure_error:
+      properties:
+        reason:
+          description: Mandatory string identifying the type of error
+          example: ERROR_CODE_FOR_MACHINES
+          type: string
+        details:
+          description: Optional, longer description of the error; may include UUID
+            of transaction for support, links to documentation etc
+          example: Optional explanation for humans with more details
+          type: string
+      required:
+      - reason
+      type: object
+  securitySchemes:
+    accessToken:
+      description: " An opaque token is required to be sent with each request in the\
+        \ HTTP header:\n- `Authorization: Bearer <access-token>`\n\nThe `access-token`\
+        \ should be generated per device, and the user should have the ability to\
+        \ revoke each token separately. "
+      scheme: bearer
+      type: http
