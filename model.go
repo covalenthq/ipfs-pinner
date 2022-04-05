@@ -10,6 +10,55 @@ import (
 	openapi "github.com/sudeepdino008/ipsa-extension/openapi"
 )
 
+// PinataResponseGetter Getter for PinataResponse object
+type PinataResponseGetter interface {
+	fmt.Stringer
+	json.Marshaler
+	GetCid() cid.Cid
+	GetPinSize() int32
+	GetTimestamp() int64 // epoch in millis
+}
+
+type pinataResponseObject struct {
+	openapi.PinataResponse
+}
+
+func (pro *pinataResponseObject) GetCid() cid.Cid {
+	cid, err := cid.Parse(pro.IpfsHash)
+	if err != nil {
+		return cid.Undef
+	}
+
+	return cid
+}
+
+func (pro *pinataResponseObject) GetPinSize() int32 {
+	return *pro.PinSize
+}
+
+func (pro *pinataResponseObject) GetTimestamp() int64 {
+	t, err := time.Parse(time.RFC3339, *pro.Timestamp)
+	if err != nil {
+		return time.Now().UnixMilli()
+	}
+
+	return t.UnixMilli()
+}
+
+func (pro *pinataResponseObject) MarshalJSON() ([]byte, error) {
+	jsonStr := fmt.Sprintf("{\"IpfsHash\": %v, \"PinSize\": %d, \"Timestamp\": %lld}", pro.GetCid(), pro.GetPinSize(), pro.GetTimestamp())
+	return []byte(jsonStr), nil
+}
+
+func (pro *pinataResponseObject) String() string {
+	marshalled, err := json.MarshalIndent(pro, "", "\t")
+	if err != nil {
+		return ""
+	}
+
+	return string(marshalled)
+}
+
 // PinGetter Getter for Pin object
 type PinGetter interface {
 	fmt.Stringer

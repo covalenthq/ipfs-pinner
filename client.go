@@ -334,8 +334,15 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (PinSt
 	return &pinStatusObject{*result}, nil
 }
 
-func (c *Client) UploadFile(ctx context.Context, filepath string) (openapi.PinataResponse, error) {
+func (c *Client) UploadFile(ctx context.Context, filepath string) (PinataResponseGetter, error) {
+	poster := c.client.FilepinApi.PinningPinFileToIPFSPost(ctx)
+	result, httpresp, err := poster.PinataFilePinRequest(openapi.PinataFilePinRequest{File: filepath}).Execute()
+	if err != nil {
+		err := httperr(httpresp, err)
+		return nil, err
+	}
 
+	return &pinataResponseObject{*result}, nil
 }
 
 func (c *Client) GetStatusByID(ctx context.Context, pinID string) (PinStatusGetter, error) {

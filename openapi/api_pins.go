@@ -235,7 +235,7 @@ func (a *PinsApiService) PinsGetExecute(r ApiPinsGetRequest) (*PinResults, *http
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -404,7 +404,7 @@ func (a *PinsApiService) PinsPostExecute(r ApiPinsPostRequest) (*PinStatus, *htt
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -565,7 +565,7 @@ func (a *PinsApiService) PinsRequestidDeleteExecute(r ApiPinsRequestidDeleteRequ
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -719,7 +719,7 @@ func (a *PinsApiService) PinsRequestidGetExecute(r ApiPinsRequestidGetRequest) (
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -892,7 +892,7 @@ func (a *PinsApiService) PinsRequestidPostExecute(r ApiPinsRequestidPostRequest)
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

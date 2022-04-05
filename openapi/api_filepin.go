@@ -171,7 +171,7 @@ func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileT
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode >= 500
+		if localVarHTTPResponse.StatusCode >= 500 {
 			var v Failure
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
