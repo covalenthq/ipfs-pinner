@@ -551,6 +551,8 @@ paths:
                 $ref: '#/components/schemas/Failure'
           description: Error response (Unexpected internal server error)
       summary: Upload file to IPFS
+      tags:
+      - filepin
 components:
   examples:
     BadRequestExample:

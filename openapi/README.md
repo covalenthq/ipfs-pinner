@@ -78,7 +78,7 @@ All URIs are relative to *https://pinning-service.example.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*DefaultApi* | [**PinningPinFileToIPFSPost**](docs/DefaultApi.md#pinningpinfiletoipfspost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
+*FilepinApi* | [**PinningPinFileToIPFSPost**](docs/FilepinApi.md#pinningpinfiletoipfspost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
 *PinsApi* | [**PinsGet**](docs/PinsApi.md#pinsget) | **Get** /pins | List pin objects
 *PinsApi* | [**PinsPost**](docs/PinsApi.md#pinspost) | **Post** /pins | Add pin object
 *PinsApi* | [**PinsRequestidDelete**](docs/PinsApi.md#pinsrequestiddelete) | **Delete** /pins/{requestid} | Remove pin object

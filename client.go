@@ -334,7 +334,9 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (PinSt
 	return &pinStatusObject{*result}, nil
 }
 
-func (c *Client)
+func (c *Client) UploadFile(ctx context.Context, filepath string) (openapi.PinataResponse, error) {
+
+}
 
 func (c *Client) GetStatusByID(ctx context.Context, pinID string) (PinStatusGetter, error) {
 	getter := c.client.PinsApi.PinsRequestidGet(ctx, pinID)

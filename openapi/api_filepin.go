@@ -23,12 +23,12 @@ var (
 	_ context.Context
 )
 
-// DefaultApiService DefaultApi service
-type DefaultApiService service
+// FilepinApiService FilepinApi service
+type FilepinApiService service
 
 type ApiPinningPinFileToIPFSPostRequest struct {
 	ctx context.Context
-	ApiService *DefaultApiService
+	ApiService *FilepinApiService
 	pinataFilePinRequest *PinataFilePinRequest
 }
 
@@ -49,7 +49,7 @@ pinata services' upload file to ipfs option
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPinningPinFileToIPFSPostRequest
 */
-func (a *DefaultApiService) PinningPinFileToIPFSPost(ctx context.Context) ApiPinningPinFileToIPFSPostRequest {
+func (a *FilepinApiService) PinningPinFileToIPFSPost(ctx context.Context) ApiPinningPinFileToIPFSPostRequest {
 	return ApiPinningPinFileToIPFSPostRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -58,7 +58,7 @@ func (a *DefaultApiService) PinningPinFileToIPFSPost(ctx context.Context) ApiPin
 
 // Execute executes the request
 //  @return PinataResponse
-func (a *DefaultApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileToIPFSPostRequest) (*PinataResponse, *http.Response, error) {
+func (a *FilepinApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileToIPFSPostRequest) (*PinataResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -66,7 +66,7 @@ func (a *DefaultApiService) PinningPinFileToIPFSPostExecute(r ApiPinningPinFileT
 		localVarReturnValue  *PinataResponse
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultApiService.PinningPinFileToIPFSPost")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.PinningPinFileToIPFSPost")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

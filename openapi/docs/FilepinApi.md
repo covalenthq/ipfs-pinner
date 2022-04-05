@@ -1,10 +1,10 @@
-# \DefaultApi
+# \FilepinApi
 
 All URIs are relative to *https://pinning-service.example.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**PinningPinFileToIPFSPost**](DefaultApi.md#PinningPinFileToIPFSPost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
+[**PinningPinFileToIPFSPost**](FilepinApi.md#PinningPinFileToIPFSPost) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
 
 
 
@@ -33,13 +33,13 @@ func main() {
 
     configuration := openapiclient.NewConfiguration()
     apiClient := openapiclient.NewAPIClient(configuration)
-    resp, r, err := apiClient.DefaultApi.PinningPinFileToIPFSPost(context.Background()).PinataFilePinRequest(pinataFilePinRequest).Execute()
+    resp, r, err := apiClient.FilepinApi.PinningPinFileToIPFSPost(context.Background()).PinataFilePinRequest(pinataFilePinRequest).Execute()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.PinningPinFileToIPFSPost``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Error when calling `FilepinApi.PinningPinFileToIPFSPost``: %v\n", err)
         fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
     }
     // response from `PinningPinFileToIPFSPost`: PinataResponse
-    fmt.Fprintf(os.Stdout, "Response from `DefaultApi.PinningPinFileToIPFSPost`: %v\n", resp)
+    fmt.Fprintf(os.Stdout, "Response from `FilepinApi.PinningPinFileToIPFSPost`: %v\n", resp)
 }
 ```
 

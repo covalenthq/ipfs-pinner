@@ -161,6 +161,8 @@ paths:
     post:
       summary: Upload file to IPFS
       description: pinata services' upload file to ipfs option
+      tags:
+        - filepin
       requestBody:
         required: true
         content:
