@@ -1,4 +1,4 @@
-package ipfs_pin_lib
+package ipfs_pinner
 
 type PinningService string
 

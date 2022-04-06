@@ -1,4 +1,4 @@
-module github.com/covalenthq/ipfs-pin-lib
+module github.com/covalenthq/ipfs-pinner
 
 go 1.18
 

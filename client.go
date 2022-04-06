@@ -1,4 +1,4 @@
-package ipfs_pin_lib
+package ipfs_pinner
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	ihttp "github.com/covalenthq/ipfs-pin-lib/http"
-	openapi "github.com/covalenthq/ipfs-pin-lib/openapi"
+	ihttp "github.com/covalenthq/ipfs-pinner/http"
+	openapi "github.com/covalenthq/ipfs-pinner/openapi"
 
 	"github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multiaddr"

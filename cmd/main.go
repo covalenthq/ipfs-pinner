@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	pinclient "github.com/covalenthq/ipfs-pin-lib"
+	pinclient "github.com/covalenthq/ipfs-pinner"
 	"github.com/ipfs/go-cid"
 )
 
@@ -108,7 +108,7 @@ func listPins(ctx context.Context, c *pinclient.Client) {
 }
 
 func createTempFileForUpload() *os.File {
-	f, err := os.CreateTemp(os.TempDir(), "ipfs_pin_lib")
+	f, err := os.CreateTemp(os.TempDir(), "ipfs_pinner")
 	filepath := f.Name()
 	if err != nil {
 		panic(err)

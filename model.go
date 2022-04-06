@@ -1,11 +1,11 @@
-package ipfs_pin_lib
+package ipfs_pinner
 
 import (
 	"encoding/json"
 	"fmt"
 	"time"
 
-	openapi "github.com/covalenthq/ipfs-pin-lib/openapi"
+	openapi "github.com/covalenthq/ipfs-pinner/openapi"
 	cid "github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multiaddr"
 )
