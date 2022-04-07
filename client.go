@@ -363,12 +363,10 @@ func (c *Client) UploadFileViaPinata(ctx context.Context, file *os.File) (Pinata
 	//ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1) // index = 1 is the file pin url
 
 	poster := c.client.FilepinApi.PinataFileUpload(ctx)
-	meta := openapi.NewPinataMetadata()
-	meta.SetName("firstup")
 	opt := openapi.NewPinataOptions()
 	opt.SetCidVersion("1")
 
-	result, httpresp, err := poster.PinataMetadata(*meta).PinataOptions(*opt).File(file).Execute()
+	result, httpresp, err := poster.PinataOptions(*opt).File(file).Execute()
 	if err != nil {
 		err := httperr(httpresp, err)
 		return nil, err

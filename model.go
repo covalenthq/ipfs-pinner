@@ -24,7 +24,7 @@ type pinataResponseObject struct {
 }
 
 func (pro *pinataResponseObject) GetCid() cid.Cid {
-	c, err := cid.Parse(pro.IpfsHash)
+	c, err := cid.Parse(*pro.IpfsHash)
 	if err != nil {
 		return cid.Undef
 	}
