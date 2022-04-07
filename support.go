@@ -32,3 +32,7 @@ func (f PinningService) getFilePinBaseUrl() string {
 	}
 	panic("unsupported file pin support")
 }
+
+func (f PinningService) String() string {
+	return string(f)
+}
