@@ -2,7 +2,7 @@ package dag
 
 import (
 	"context"
-	"os"
+	"io"
 
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
@@ -23,27 +23,11 @@ func NewUnixfsAPI(ipfs coreiface.CoreAPI, cidVersion int, cidGenerationOnly bool
 	return &api
 }
 
-func (api *unixfsApi) GenerateDag(ctx context.Context, filepath string) (cid.Cid, error) {
-	node, err := getNodeFor(filepath)
-	if err != nil {
-		return cid.Undef, err
-	}
+func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Cid, error) {
+	node := files.NewReaderFile(reader)
 	rpath, err := api.ipfs.Unixfs().Add(ctx, node, api.addOptions...)
 	if err != nil {
 		return cid.Undef, err
 	}
 	return rpath.Cid(), nil
-}
-
-func getNodeFor(filepath string) (files.Node, error) {
-	stat, err := os.Stat(filepath)
-	if err != nil {
-		return nil, err
-	}
-	n, err := files.NewSerialFile(filepath, true, stat)
-	if err != nil {
-		return nil, err
-	}
-
-	return n, nil
 }
