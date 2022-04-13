@@ -29,7 +29,7 @@ func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
 		logger.Fatal("error initializing ipfs node: ", err)
 	}
 
-	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest)
+	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest, req.cidVersion)
 	node.carExporter = car.NewCarExporter(node.ipfsCore)
 	node.unixfsService = dag.NewUnixfsAPI(node.ipfsCore, req.cidVersion, req.cidComputeOnly)
 

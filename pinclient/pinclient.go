@@ -24,11 +24,12 @@ var logger = logging.Logger("ipfs-pinner")
 const UserAgent = "ipfs-pinner"
 
 type Client struct {
-	client *openapi.APIClient
-	ps     core.PinningService
+	client     *openapi.APIClient
+	ps         core.PinningService
+	cidVersion int
 }
 
-func NewClient(request ClientCreateRequest) PinServiceAPI {
+func NewClient(request ClientCreateRequest, cidVersion int) PinServiceAPI {
 	// assuming we are getting a supported pinning service request
 	config := openapi.NewConfiguration()
 	if request.httpClient == nil {
@@ -49,7 +50,7 @@ func NewClient(request ClientCreateRequest) PinServiceAPI {
 	}
 	config.HTTPClient = request.httpClient
 
-	return &Client{client: openapi.NewAPIClient(config), ps: request.ps}
+	return &Client{client: openapi.NewAPIClient(config), ps: request.ps, cidVersion: cidVersion}
 }
 
 func (c *Client) IsIPFSSupportedFor(ps core.PinningService) bool {
@@ -130,7 +131,7 @@ func (c *Client) UploadFileViaPinata(ctx context.Context, file *os.File) (core.P
 
 	poster := c.client.FilepinApi.PinataFileUpload(ctx)
 	opt := openapi.NewPinataOptions()
-	opt.SetCidVersion("1")
+	opt.SetCidVersion(string(rune(c.cidVersion)))
 
 	result, httpresp, err := poster.PinataOptions(*opt).File(file).Execute()
 	if err != nil {
