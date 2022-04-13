@@ -28,10 +28,10 @@ var (
 type FilepinApiService service
 
 type ApiPinataFileUploadRequest struct {
-	ctx context.Context
-	ApiService *FilepinApiService
-	file **os.File
-	pinataOptions *PinataOptions
+	ctx            context.Context
+	ApiService     *FilepinApiService
+	file           **os.File
+	pinataOptions  *PinataOptions
 	pinataMetadata *PinataMetadata
 }
 
@@ -64,7 +64,7 @@ pinata services' upload file to ipfs option
 func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileUploadRequest {
 	return ApiPinataFileUploadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -72,10 +72,10 @@ func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileU
 //  @return PinataResponse
 func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest) (*PinataResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinataResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinataResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.PinataFileUpload")
@@ -110,8 +110,8 @@ func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	var fileLocalVarFormFileName string
-	var fileLocalVarFileName     string
-	var fileLocalVarFileBytes    []byte
+	var fileLocalVarFileName string
+	var fileLocalVarFileBytes []byte
 
 	fileLocalVarFormFileName = "file"
 

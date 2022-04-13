@@ -12,12 +12,16 @@ import (
 	selectorparse "github.com/ipld/go-ipld-prime/traversal/selector/parse"
 )
 
-// implements the CarExporter
+// implements the CarExporterAPI
 type carExporter struct {
 	api coreiface.CoreAPI
 }
 
-func (exp *carExporter) export(ctx context.Context, contentRoot cid.Cid, writer io.Writer) error {
+func NewCarExporter(api coreiface.CoreAPI) CarExporterAPI {
+	return &carExporter{api}
+}
+
+func (exp *carExporter) Export(ctx context.Context, contentRoot cid.Cid, writer io.Writer) error {
 	store := dagStore{dag: exp.api.Dag(), ctx: ctx}
 	dag := gocar.Dag{Root: contentRoot, Selector: selectorparse.CommonSelector_ExploreAllRecursively}
 	// TraverseLinksOnlyOnce is safe for an exhaustive selector but won't be when we allow
@@ -26,13 +30,13 @@ func (exp *carExporter) export(ctx context.Context, contentRoot cid.Cid, writer 
 	return scar.Write(writer)
 }
 
-func (exp *carExporter) multiExport(ctx context.Context, contentRoot cid.Cid, writers []io.Writer) error {
+func (exp *carExporter) MultiExport(ctx context.Context, contentRoot cid.Cid, writers []io.Writer) error {
 	if len(writers) == 0 {
 		return fmt.Errorf("no writers provided")
 	}
 
 	if len(writers) == 1 {
-		return exp.export(ctx, contentRoot, writers[0])
+		return exp.Export(ctx, contentRoot, writers[0])
 	}
 
 	store := dagStore{dag: exp.api.Dag(), ctx: ctx}

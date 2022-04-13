@@ -1,19 +1,23 @@
-package ipfs_pinner
+package pinclient
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/covalenthq/ipfs-pinner/core"
+)
 
 type ClientCreateRequest struct {
-	ps                    PinningService
+	ps                    core.PinningService
 	pinningServiceBaseUrl string
 	filePinBaseUrl        string
 	bearerToken           string
 	httpClient            *http.Client
 }
 
-func NewClientRequest(ps PinningService) ClientCreateRequest {
+func NewClientRequest(ps core.PinningService) ClientCreateRequest {
 	request := ClientCreateRequest{ps: ps}
-	request.pinningServiceBaseUrl = ps.getPinningServiceBaseUrl()
-	request.filePinBaseUrl = ps.getFilePinBaseUrl()
+	request.pinningServiceBaseUrl = ps.GetPinningServiceBaseUrl()
+	request.filePinBaseUrl = ps.GetFilePinBaseUrl()
 	return request
 }
 

@@ -1,4 +1,4 @@
-package ipfs_pinner
+package core
 
 type PinningService string
 
@@ -8,11 +8,7 @@ const (
 	Other                      = "other"
 )
 
-func (f PinningService) filePinningSupported() bool {
-	return f != Other
-}
-
-func (f PinningService) getPinningServiceBaseUrl() string {
+func (f PinningService) GetPinningServiceBaseUrl() string {
 	switch f {
 	case Pinata:
 		return "https://api.pinata.cloud/psa"
@@ -23,7 +19,7 @@ func (f PinningService) getPinningServiceBaseUrl() string {
 	return ""
 }
 
-func (f PinningService) getFilePinBaseUrl() string {
+func (f PinningService) GetFilePinBaseUrl() string {
 	switch f {
 	case Pinata:
 		return "https://api.pinata.cloud"

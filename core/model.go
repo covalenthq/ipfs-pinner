@@ -1,4 +1,4 @@
-package ipfs_pinner
+package core
 
 import (
 	"encoding/json"
@@ -7,8 +7,11 @@ import (
 
 	openapi "github.com/covalenthq/ipfs-pinner/openapi"
 	cid "github.com/ipfs/go-cid"
+	logging "github.com/ipfs/go-log/v2"
 	"github.com/multiformats/go-multiaddr"
 )
+
+var logger = logging.Logger("ipfs-pinner")
 
 // PinataResponseGetter Getter for PinataResponse object
 type PinataResponseGetter interface {
@@ -21,6 +24,11 @@ type PinataResponseGetter interface {
 
 type pinataResponseObject struct {
 	openapi.PinataResponse
+}
+
+func NewPinataResponseGetter(res openapi.PinataResponse) PinataResponseGetter {
+	return &pinataResponseObject{res}
+
 }
 
 func (pro *pinataResponseObject) GetCid() cid.Cid {
@@ -155,6 +163,10 @@ type PinStatusGetter interface {
 
 type pinStatusObject struct {
 	openapi.PinStatus
+}
+
+func NewPinStatusGetter(status openapi.PinStatus) PinStatusGetter {
+	return &pinStatusObject{status}
 }
 
 func (p *pinStatusObject) GetDelegates() []multiaddr.Multiaddr {

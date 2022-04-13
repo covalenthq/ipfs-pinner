@@ -18,8 +18,8 @@ import (
 // InlineObject File upload for pinning request
 type InlineObject struct {
 	// file you're attempting to upload to pinata
-	File *os.File `json:"file"`
-	PinataOptions *PinataOptions `json:"pinataOptions,omitempty"`
+	File           *os.File        `json:"file"`
+	PinataOptions  *PinataOptions  `json:"pinataOptions,omitempty"`
 	PinataMetadata *PinataMetadata `json:"pinataMetadata,omitempty"`
 }
 
@@ -54,7 +54,7 @@ func (o *InlineObject) GetFile() *os.File {
 // GetFileOk returns a tuple with the File field value
 // and a boolean to check if the value has been set.
 func (o *InlineObject) GetFileOk() (**os.File, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.File, true
@@ -178,5 +178,3 @@ func (v *NullableInlineObject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

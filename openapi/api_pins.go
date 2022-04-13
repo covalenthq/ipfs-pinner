@@ -29,16 +29,16 @@ var (
 type PinsApiService service
 
 type ApiPinsGetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PinsApiService
-	cid *[]string
-	name *string
-	match *TextMatchingStrategy
-	status *[]Status
-	before *time.Time
-	after *time.Time
-	limit *int32
-	meta *map[string]string
+	cid        *[]string
+	name       *string
+	match      *TextMatchingStrategy
+	status     *[]Status
+	before     *time.Time
+	after      *time.Time
+	limit      *int32
+	meta       *map[string]string
 }
 
 // Return pin objects responsible for pinning the specified CID(s); be aware that using longer hash functions introduces further constraints on the number of CIDs that will fit under the limit of 2000 characters per URL  in browser contexts
@@ -46,36 +46,43 @@ func (r ApiPinsGetRequest) Cid(cid []string) ApiPinsGetRequest {
 	r.cid = &cid
 	return r
 }
+
 // Return pin objects with specified name (by default a case-sensitive, exact match)
 func (r ApiPinsGetRequest) Name(name string) ApiPinsGetRequest {
 	r.name = &name
 	return r
 }
+
 // Customize the text matching strategy applied when the name filter is present; exact (the default) is a case-sensitive exact match, partial matches anywhere in the name, iexact and ipartial are case-insensitive versions of the exact and partial strategies
 func (r ApiPinsGetRequest) Match(match TextMatchingStrategy) ApiPinsGetRequest {
 	r.match = &match
 	return r
 }
+
 // Return pin objects for pins with the specified status
 func (r ApiPinsGetRequest) Status(status []Status) ApiPinsGetRequest {
 	r.status = &status
 	return r
 }
+
 // Return results created (queued) before provided timestamp
 func (r ApiPinsGetRequest) Before(before time.Time) ApiPinsGetRequest {
 	r.before = &before
 	return r
 }
+
 // Return results created (queued) after provided timestamp
 func (r ApiPinsGetRequest) After(after time.Time) ApiPinsGetRequest {
 	r.after = &after
 	return r
 }
+
 // Max records to return
 func (r ApiPinsGetRequest) Limit(limit int32) ApiPinsGetRequest {
 	r.limit = &limit
 	return r
 }
+
 // Return pin objects that match specified metadata keys passed as a string representation of a JSON object; when implementing a client library, make sure the parameter is URL-encoded to ensure safe transport
 func (r ApiPinsGetRequest) Meta(meta map[string]string) ApiPinsGetRequest {
 	r.meta = &meta
@@ -97,7 +104,7 @@ List all the pin objects, matching optional filters; when no filter is provided,
 func (a *PinsApiService) PinsGet(ctx context.Context) ApiPinsGetRequest {
 	return ApiPinsGetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -105,10 +112,10 @@ func (a *PinsApiService) PinsGet(ctx context.Context) ApiPinsGetRequest {
 //  @return PinResults
 func (a *PinsApiService) PinsGetExecute(r ApiPinsGetRequest) (*PinResults, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinResults
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinResults
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PinsApiService.PinsGet")
@@ -260,9 +267,9 @@ func (a *PinsApiService) PinsGetExecute(r ApiPinsGetRequest) (*PinResults, *http
 }
 
 type ApiPinsPostRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PinsApiService
-	pin *Pin
+	pin        *Pin
 }
 
 func (r ApiPinsPostRequest) Pin(pin Pin) ApiPinsPostRequest {
@@ -285,7 +292,7 @@ Add a new pin object for the current access token
 func (a *PinsApiService) PinsPost(ctx context.Context) ApiPinsPostRequest {
 	return ApiPinsPostRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -293,10 +300,10 @@ func (a *PinsApiService) PinsPost(ctx context.Context) ApiPinsPostRequest {
 //  @return PinStatus
 func (a *PinsApiService) PinsPostExecute(r ApiPinsPostRequest) (*PinStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinStatus
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PinsApiService.PinsPost")
@@ -429,11 +436,10 @@ func (a *PinsApiService) PinsPostExecute(r ApiPinsPostRequest) (*PinStatus, *htt
 }
 
 type ApiPinsRequestidDeleteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PinsApiService
-	requestid string
+	requestid  string
 }
-
 
 func (r ApiPinsRequestidDeleteRequest) Execute() (*http.Response, error) {
 	return r.ApiService.PinsRequestidDeleteExecute(r)
@@ -451,17 +457,17 @@ Remove a pin object
 func (a *PinsApiService) PinsRequestidDelete(ctx context.Context, requestid string) ApiPinsRequestidDeleteRequest {
 	return ApiPinsRequestidDeleteRequest{
 		ApiService: a,
-		ctx: ctx,
-		requestid: requestid,
+		ctx:        ctx,
+		requestid:  requestid,
 	}
 }
 
 // Execute executes the request
 func (a *PinsApiService) PinsRequestidDeleteExecute(r ApiPinsRequestidDeleteRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PinsApiService.PinsRequestidDelete")
@@ -581,11 +587,10 @@ func (a *PinsApiService) PinsRequestidDeleteExecute(r ApiPinsRequestidDeleteRequ
 }
 
 type ApiPinsRequestidGetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PinsApiService
-	requestid string
+	requestid  string
 }
-
 
 func (r ApiPinsRequestidGetRequest) Execute() (*PinStatus, *http.Response, error) {
 	return r.ApiService.PinsRequestidGetExecute(r)
@@ -603,8 +608,8 @@ Get a pin object and its status
 func (a *PinsApiService) PinsRequestidGet(ctx context.Context, requestid string) ApiPinsRequestidGetRequest {
 	return ApiPinsRequestidGetRequest{
 		ApiService: a,
-		ctx: ctx,
-		requestid: requestid,
+		ctx:        ctx,
+		requestid:  requestid,
 	}
 }
 
@@ -612,10 +617,10 @@ func (a *PinsApiService) PinsRequestidGet(ctx context.Context, requestid string)
 //  @return PinStatus
 func (a *PinsApiService) PinsRequestidGetExecute(r ApiPinsRequestidGetRequest) (*PinStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinStatus
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PinsApiService.PinsRequestidGet")
@@ -744,10 +749,10 @@ func (a *PinsApiService) PinsRequestidGetExecute(r ApiPinsRequestidGetRequest) (
 }
 
 type ApiPinsRequestidPostRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PinsApiService
-	requestid string
-	pin *Pin
+	requestid  string
+	pin        *Pin
 }
 
 func (r ApiPinsRequestidPostRequest) Pin(pin Pin) ApiPinsRequestidPostRequest {
@@ -771,8 +776,8 @@ Replace an existing pin object (shortcut for executing remove and add operations
 func (a *PinsApiService) PinsRequestidPost(ctx context.Context, requestid string) ApiPinsRequestidPostRequest {
 	return ApiPinsRequestidPostRequest{
 		ApiService: a,
-		ctx: ctx,
-		requestid: requestid,
+		ctx:        ctx,
+		requestid:  requestid,
 	}
 }
 
@@ -780,10 +785,10 @@ func (a *PinsApiService) PinsRequestidPost(ctx context.Context, requestid string
 //  @return PinStatus
 func (a *PinsApiService) PinsRequestidPostExecute(r ApiPinsRequestidPostRequest) (*PinStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinStatus
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PinsApiService.PinsRequestidPost")
