@@ -1,4 +1,4 @@
-module github.com/sudeepdino008/ipfs-pinner
+module github.com/covalenthq/ipfs-pinner
 
 go 1.17
 
