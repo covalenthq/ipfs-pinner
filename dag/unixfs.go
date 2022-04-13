@@ -1,13 +1,3 @@
-// unixFsOptions := []options.UnixfsAddOption{options.Unixfs.CidVersion(1)}
-// 	if hashOnly {
-// 		unixFsOptions = append(unixFsOptions, options.Unixfs.HashOnly(true))
-// 	}
-// 	rpath, err := api.Unixfs().Add(ctx, node, unixFsOptions...) //, options.Unixfs.HashOnly(true))
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Println(rpath.Cid())
-
 package dag
 
 import (
