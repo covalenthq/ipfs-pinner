@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -59,7 +60,7 @@ func initIpfsRepo() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error getting path root: %s", err)
 	}
-	if err = os.Mkdir(pathRoot, 0777); err != nil {
+	if err = os.MkdirAll(pathRoot, fs.ModeDir); err != nil {
 		return "", fmt.Errorf("can't create ipfs repo directory: %s", err)
 	}
 
