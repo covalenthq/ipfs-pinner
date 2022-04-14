@@ -2,7 +2,7 @@
 // Specifically, it aims to provide a way to upload data to pinning services using
 // either IPFS remote pinning service API or direct/car file uploads.
 
-package coreapi
+package pinner
 
 import (
 	car "github.com/covalenthq/ipfs-pinner/car"

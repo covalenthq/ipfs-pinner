@@ -1,4 +1,4 @@
-package coreapi
+package pinner
 
 import (
 	"github.com/covalenthq/ipfs-pinner/pinclient"

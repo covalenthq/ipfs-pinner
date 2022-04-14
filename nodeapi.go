@@ -1,6 +1,6 @@
 // defines the api for the ipfs-pinner node
 
-package coreapi
+package pinner
 
 import (
 	car "github.com/covalenthq/ipfs-pinner/car"
