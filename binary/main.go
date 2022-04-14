@@ -39,7 +39,8 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	carFileName := carf.Name()
+	defer carf.Close()
+
 	log.Printf("car file location: %s\n", carf.Name())
 
 	err = node.CarExporter().Export(ctx, fcid, carf)
@@ -47,12 +48,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	carf.Close()
-
-	carf, err = os.Open(carFileName)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
+	carf.Seek(0, 0) // reset for read
 	ccid, err := node.PinService().UploadFile(ctx, carf)
 	if err != nil {
 		log.Fatalf("%v", err)
