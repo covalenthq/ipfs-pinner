@@ -110,6 +110,10 @@ func (c *Client) UploadFile(ctx context.Context, file *os.File) (cid.Cid, error)
 	return fcid.GetCid(), nil
 }
 
+func (c *Client) ServiceType() core.PinningService {
+	return c.ps
+}
+
 func getCIDEncoder() multibase.Encoder {
 	enc, err := multibase.NewEncoder(multibase.Base32)
 	if err != nil {
