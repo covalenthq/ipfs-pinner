@@ -28,10 +28,10 @@ var (
 type FilepinApiService service
 
 type ApiPinataFileUploadRequest struct {
-	ctx context.Context
-	ApiService *FilepinApiService
-	file **os.File
-	pinataOptions *PinataOptions
+	ctx            context.Context
+	ApiService     *FilepinApiService
+	file           **os.File
+	pinataOptions  *PinataOptions
 	pinataMetadata *PinataMetadata
 }
 
@@ -64,7 +64,7 @@ pinata services' upload file to ipfs option
 func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileUploadRequest {
 	return ApiPinataFileUploadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -72,10 +72,10 @@ func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileU
 //  @return PinataResponse
 func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest) (*PinataResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PinataResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PinataResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.PinataFileUpload")
@@ -110,8 +110,8 @@ func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	var fileLocalVarFormFileName string
-	var fileLocalVarFileName     string
-	var fileLocalVarFileBytes    []byte
+	var fileLocalVarFileName string
+	var fileLocalVarFileBytes []byte
 
 	fileLocalVarFormFileName = "file"
 
@@ -234,9 +234,9 @@ func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest
 }
 
 type ApiWeb3StorageCarUploadRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *FilepinApiService
-	body **os.File
+	body       **os.File
 }
 
 func (r ApiWeb3StorageCarUploadRequest) Body(body *os.File) ApiWeb3StorageCarUploadRequest {
@@ -259,7 +259,7 @@ Upload car file to web3.storage
 func (a *FilepinApiService) Web3StorageCarUpload(ctx context.Context) ApiWeb3StorageCarUploadRequest {
 	return ApiWeb3StorageCarUploadRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -267,10 +267,10 @@ func (a *FilepinApiService) Web3StorageCarUpload(ctx context.Context) ApiWeb3Sto
 //  @return Web3StorageCarResponse
 func (a *FilepinApiService) Web3StorageCarUploadExecute(r ApiWeb3StorageCarUploadRequest) (*Web3StorageCarResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Web3StorageCarResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Web3StorageCarResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FilepinApiService.Web3StorageCarUpload")
