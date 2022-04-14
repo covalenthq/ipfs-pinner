@@ -22,7 +22,7 @@ func main() {
 	ctx := context.Background()
 	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := coreapi.NewNodeRequest().PinClientRequest(clientCreateReq).Context(context.Background()).CidVersion(0).CidComputeOnly(false)
+	nodeCreateReq := coreapi.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
 	node := coreapi.NewPinnerNode(*nodeCreateReq)
 
 	file, err := os.Open(UPLOAD_FILE)
@@ -34,7 +34,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	carf, err := os.CreateTemp(os.TempDir(), ".car")
+	carf, err := os.CreateTemp(os.TempDir(), "*.car")
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
