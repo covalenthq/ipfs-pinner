@@ -19,10 +19,10 @@ import (
 type PinStatus struct {
 	// Globally unique identifier of the pin request; can be used to check the status of ongoing pinning, or pin removal
 	Requestid string `json:"requestid"`
-	Status    Status `json:"status"`
+	Status Status `json:"status"`
 	// Immutable timestamp indicating when a pin request entered a pinning service; can be used for filtering results and pagination
 	Created time.Time `json:"created"`
-	Pin     Pin       `json:"pin"`
+	Pin Pin `json:"pin"`
 	// List of multiaddrs designated by pinning service for transferring any new data from external peers
 	Delegates []string `json:"delegates"`
 	// Optional info for PinStatus response
@@ -64,7 +64,7 @@ func (o *PinStatus) GetRequestid() string {
 // GetRequestidOk returns a tuple with the Requestid field value
 // and a boolean to check if the value has been set.
 func (o *PinStatus) GetRequestidOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Requestid, true
@@ -88,7 +88,7 @@ func (o *PinStatus) GetStatus() Status {
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
 func (o *PinStatus) GetStatusOk() (*Status, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Status, true
@@ -112,7 +112,7 @@ func (o *PinStatus) GetCreated() time.Time {
 // GetCreatedOk returns a tuple with the Created field value
 // and a boolean to check if the value has been set.
 func (o *PinStatus) GetCreatedOk() (*time.Time, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Created, true
@@ -136,7 +136,7 @@ func (o *PinStatus) GetPin() Pin {
 // GetPinOk returns a tuple with the Pin field value
 // and a boolean to check if the value has been set.
 func (o *PinStatus) GetPinOk() (*Pin, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Pin, true
@@ -160,7 +160,7 @@ func (o *PinStatus) GetDelegates() []string {
 // GetDelegatesOk returns a tuple with the Delegates field value
 // and a boolean to check if the value has been set.
 func (o *PinStatus) GetDelegatesOk() ([]string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return o.Delegates, true
@@ -261,3 +261,5 @@ func (v *NullablePinStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

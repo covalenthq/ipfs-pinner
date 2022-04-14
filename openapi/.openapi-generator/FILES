@@ -20,6 +20,7 @@ docs/PinataResponse.md
 docs/PinsApi.md
 docs/Status.md
 docs/TextMatchingStrategy.md
+docs/Web3StorageCarResponse.md
 git_push.sh
 go.mod
 go.sum
@@ -34,5 +35,6 @@ model_pinata_options.go
 model_pinata_response.go
 model_status.go
 model_text_matching_strategy.go
+model_web3_storage_car_response.go
 response.go
 utils.go

@@ -20,9 +20,9 @@ type TextMatchingStrategy string
 
 // List of TextMatchingStrategy
 const (
-	EXACT    TextMatchingStrategy = "exact"
-	IEXACT   TextMatchingStrategy = "iexact"
-	PARTIAL  TextMatchingStrategy = "partial"
+	EXACT TextMatchingStrategy = "exact"
+	IEXACT TextMatchingStrategy = "iexact"
+	PARTIAL TextMatchingStrategy = "partial"
 	IPARTIAL TextMatchingStrategy = "ipartial"
 )
 
@@ -112,3 +112,4 @@ func (v *NullableTextMatchingStrategy) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

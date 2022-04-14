@@ -20,10 +20,10 @@ type Status string
 
 // List of Status
 const (
-	QUEUED  Status = "queued"
+	QUEUED Status = "queued"
 	PINNING Status = "pinning"
-	PINNED  Status = "pinned"
-	FAILED  Status = "failed"
+	PINNED Status = "pinned"
+	FAILED Status = "failed"
 )
 
 // All allowed values of Status enum
@@ -112,3 +112,4 @@ func (v *NullableStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

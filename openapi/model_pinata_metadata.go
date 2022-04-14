@@ -17,7 +17,7 @@ import (
 // PinataMetadata struct for PinataMetadata
 type PinataMetadata struct {
 	// null
-	Name      *string            `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	Keyvalues *map[string]string `json:"keyvalues,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullablePinataMetadata) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

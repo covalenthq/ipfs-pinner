@@ -54,7 +54,7 @@ func (o *PinResults) GetCount() int32 {
 // GetCountOk returns a tuple with the Count field value
 // and a boolean to check if the value has been set.
 func (o *PinResults) GetCountOk() (*int32, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Count, true
@@ -78,7 +78,7 @@ func (o *PinResults) GetResults() []PinStatus {
 // GetResultsOk returns a tuple with the Results field value
 // and a boolean to check if the value has been set.
 func (o *PinResults) GetResultsOk() ([]PinStatus, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return o.Results, true
@@ -135,3 +135,5 @@ func (v *NullablePinResults) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
