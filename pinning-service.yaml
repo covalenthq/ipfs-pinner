@@ -160,7 +160,7 @@ paths:
   
   #IPFS pinning service API spec endpoints (end)
 
-  # complete file pin api path (start)
+  # complete file pin api pinata (start)
   /pinning/pinFileToIPFS:
     post:
       summary: Upload file to IPFS
@@ -214,7 +214,45 @@ paths:
           $ref: '#/components/responses/CustomServiceError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-  # complete file pin api path (start)
+  # complete file pin api pinata (end)
+
+  # car file pin api web3.storage (start)
+  /car:
+    post:
+      summary: Upload car file to web3.storage
+      description: Upload car file to web3.storage
+      operationId: web3StorageCarUpload
+      servers:
+        - url: https://api.web3.storage
+      tags:
+        - filepin
+      requestBody:
+        required: true
+        content:
+          application/car:
+            schema:
+              description: car file binary data
+              type: string
+              format: binary
+
+      responses:
+        '200':
+          description: Successful response (with IPFS hash)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Web3StorageCarResponse'
+
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+
+  # car file pin api web3.storage (end)
 
 components:
   schemas:
@@ -382,6 +420,14 @@ components:
     #     pinataMetadata:
     #       $ref: '#/components/schemas/PinataMetadata'
 
+    Web3StorageCarResponse:
+      description: web3.storage car upload response
+      type: object
+      properties:
+        cid:
+          description: This is the IPFS cid provided back for your content
+          type: string
+
     PinataResponse:
       description: response back to file pin request
       type: object
@@ -541,6 +587,14 @@ components:
           examples:
             UnauthorizedExample:
               $ref: '#/components/examples/UnauthorizedExample'
+
+    Forbidden:
+      description: Error response for trying to access forbidden resources
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Failure'
+
 
     NotFound:
       description: Error response (The specified resource was not found)

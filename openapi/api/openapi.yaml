@@ -576,6 +576,63 @@ paths:
       summary: Upload file to IPFS
       tags:
       - filepin
+  /car:
+    post:
+      description: Upload car file to web3.storage
+      operationId: web3StorageCarUpload
+      requestBody:
+        content:
+          application/car:
+            schema:
+              description: car file binary data
+              format: binary
+              type: string
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Web3StorageCarResponse'
+          description: Successful response (with IPFS hash)
+        "400":
+          content:
+            application/json:
+              examples:
+                BadRequestExample:
+                  $ref: '#/components/examples/BadRequestExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Bad request)
+        "401":
+          content:
+            application/json:
+              examples:
+                UnauthorizedExample:
+                  $ref: '#/components/examples/UnauthorizedExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unauthorized; access token is missing or invalid)
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response for trying to access forbidden resources
+        "5XX":
+          content:
+            application/json:
+              examples:
+                InternalServerErrorExample:
+                  $ref: '#/components/examples/InternalServerErrorExample'
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Error response (Unexpected internal server error)
+      servers:
+      - url: https://api.web3.storage
+      summary: Upload car file to web3.storage
+      tags:
+      - filepin
 components:
   examples:
     BadRequestExample:
@@ -751,6 +808,12 @@ components:
           schema:
             $ref: '#/components/schemas/Failure'
       description: Error response (Unauthorized; access token is missing or invalid)
+    Forbidden:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Failure'
+      description: Error response for trying to access forbidden resources
     NotFound:
       content:
         application/json:
@@ -1050,6 +1113,15 @@ components:
           $ref: '#/components/schemas/Failure_error'
       required:
       - error
+      type: object
+    Web3StorageCarResponse:
+      description: web3.storage car upload response
+      example:
+        cid: cid
+      properties:
+        cid:
+          description: This is the IPFS cid provided back for your content
+          type: string
       type: object
     PinataResponse:
       description: response back to file pin request

@@ -1,33 +1,21 @@
 package coreapi
 
 import (
-	"context"
-
 	"github.com/covalenthq/ipfs-pinner/pinclient"
 )
 
 type PinnerNodeCreateRequest struct {
 	pinServiceRequest pinclient.ClientCreateRequest
-	ctx               context.Context
 	cidComputeOnly    bool
 	cidVersion        int
 }
 
-func NewNodeRequest() *PinnerNodeCreateRequest {
+func NewNodeRequest(clientRequest pinclient.ClientCreateRequest) *PinnerNodeCreateRequest {
 	request := new(PinnerNodeCreateRequest)
 	request.cidVersion = 0
 	request.cidComputeOnly = true
+	request.pinServiceRequest = clientRequest
 	return request
-}
-
-func (req *PinnerNodeCreateRequest) Context(ctx context.Context) *PinnerNodeCreateRequest {
-	req.ctx = ctx
-	return req
-}
-
-func (req *PinnerNodeCreateRequest) PinClientRequest(clientRequest pinclient.ClientCreateRequest) *PinnerNodeCreateRequest {
-	req.pinServiceRequest = clientRequest
-	return req
 }
 
 func (req *PinnerNodeCreateRequest) CidVersion(version int) *PinnerNodeCreateRequest {

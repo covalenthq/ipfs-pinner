@@ -79,6 +79,7 @@ All URIs are relative to *https://pinning-service.example.com*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *FilepinApi* | [**PinataFileUpload**](docs/FilepinApi.md#pinatafileupload) | **Post** /pinning/pinFileToIPFS | Upload file to IPFS
+*FilepinApi* | [**Web3StorageCarUpload**](docs/FilepinApi.md#web3storagecarupload) | **Post** /car | Upload car file to web3.storage
 *PinsApi* | [**PinsGet**](docs/PinsApi.md#pinsget) | **Get** /pins | List pin objects
 *PinsApi* | [**PinsPost**](docs/PinsApi.md#pinspost) | **Post** /pins | Add pin object
 *PinsApi* | [**PinsRequestidDelete**](docs/PinsApi.md#pinsrequestiddelete) | **Delete** /pins/{requestid} | Remove pin object
@@ -99,6 +100,7 @@ Class | Method | HTTP request | Description
  - [PinataResponse](docs/PinataResponse.md)
  - [Status](docs/Status.md)
  - [TextMatchingStrategy](docs/TextMatchingStrategy.md)
+ - [Web3StorageCarResponse](docs/Web3StorageCarResponse.md)
 
 
 ## Documentation For Authorization

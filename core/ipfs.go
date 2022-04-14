@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -16,7 +17,7 @@ import (
 )
 
 // returns a go-ipfs node backend CoreAPI instance
-func CreateIpfsCoreApi(ctx context.Context, cidComputeOnly bool) (coreiface.CoreAPI, error) {
+func CreateIpfsCoreApi(cidComputeOnly bool) (coreiface.CoreAPI, error) {
 	cfg := core.BuildCfg{
 		Online:    false, //networking off
 		Permanent: false, // want node to be lightweight
@@ -48,7 +49,7 @@ func CreateIpfsCoreApi(ctx context.Context, cidComputeOnly bool) (coreiface.Core
 	}
 
 	var nnode *core.IpfsNode
-	if nnode, err = core.NewNode(ctx, &cfg); err != nil {
+	if nnode, err = core.NewNode(context.Background(), &cfg); err != nil {
 		return nil, err
 	}
 	return coreapi.NewCoreAPI(nnode, options.Api.Offline(true), options.Api.FetchBlocks(false))
@@ -59,7 +60,7 @@ func initIpfsRepo() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error getting path root: %s", err)
 	}
-	if err = os.Mkdir(pathRoot, 0777); err != nil {
+	if err = os.MkdirAll(pathRoot, fs.ModeDir); err != nil {
 		return "", fmt.Errorf("can't create ipfs repo directory: %s", err)
 	}
 

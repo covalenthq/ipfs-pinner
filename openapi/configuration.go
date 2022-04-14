@@ -116,6 +116,12 @@ func NewConfiguration() *Configuration {
 					Description: "No description provided",
 				},
 			},
+			"FilepinApiService.Web3StorageCarUpload": {
+				{
+					URL:         "https://api.web3.storage",
+					Description: "No description provided",
+				},
+			},
 		},
 	}
 	return cfg

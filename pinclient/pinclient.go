@@ -90,16 +90,24 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (core.
 }
 
 func (c *Client) UploadFile(ctx context.Context, file *os.File) (cid.Cid, error) {
-	if c.ps == core.Pinata {
-		res, err := c.UploadFileViaPinata(ctx, file)
-		if err != nil {
-			return cid.Undef, fmt.Errorf("%w", err)
-		}
+	var err error
+	var fcid core.CidGetter
+	switch c.ps {
+	case core.Pinata:
+		fcid, err = c.uploadFileViaPinata(ctx, file)
 
-		return res.GetCid(), nil
+	case core.Web3Storage:
+		fcid, err = c.uploadFileViaWeb3Storage(ctx, file)
+
+	default:
+		logger.Fatalf("only pinata supported for file upload")
 	}
-	panic("only pinata supported for file upload")
-	// else web3.storge (to be added...)
+
+	if err != nil {
+		return cid.Undef, fmt.Errorf("%w", err)
+	}
+
+	return fcid.GetCid(), nil
 }
 
 func getCIDEncoder() multibase.Encoder {
@@ -126,7 +134,7 @@ func httperr(resp *http.Response, e error) error {
 	return errors.Wrapf(e, "remote pinning service returned http error %d", resp.StatusCode)
 }
 
-func (c *Client) UploadFileViaPinata(ctx context.Context, file *os.File) (core.PinataResponseGetter, error) {
+func (c *Client) uploadFileViaPinata(ctx context.Context, file *os.File) (core.PinataResponseGetter, error) {
 	//ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1) // index = 1 is the file pin url
 
 	poster := c.client.FilepinApi.PinataFileUpload(ctx)
@@ -140,4 +148,15 @@ func (c *Client) UploadFileViaPinata(ctx context.Context, file *os.File) (core.P
 	}
 
 	return core.NewPinataResponseGetter(*result), nil
+}
+
+func (c *Client) uploadFileViaWeb3Storage(ctx context.Context, file *os.File) (core.Web3StorageResponseGetter, error) {
+	poster := c.client.FilepinApi.Web3StorageCarUpload(ctx)
+	result, httpresp, err := poster.Body(file).Execute()
+	if err != nil {
+		err := httperr(httpresp, err)
+		return nil, err
+	}
+
+	return core.NewWeb3StorageResponseGetter(*result), nil
 }
