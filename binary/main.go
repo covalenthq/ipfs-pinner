@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
+	pinner "github.com/covalenthq/ipfs-pinner"
 	"github.com/covalenthq/ipfs-pinner/core"
-	"github.com/covalenthq/ipfs-pinner/coreapi"
 	client "github.com/covalenthq/ipfs-pinner/pinclient"
 )
 
@@ -22,8 +22,8 @@ func main() {
 	ctx := context.Background()
 	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := coreapi.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
-	node := coreapi.NewPinnerNode(*nodeCreateReq)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
+	node := pinner.NewPinnerNode(*nodeCreateReq)
 
 	file, err := os.Open(UPLOAD_FILE)
 	if err != nil {
