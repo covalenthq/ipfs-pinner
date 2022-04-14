@@ -4,8 +4,8 @@ type PinningService string
 
 const (
 	Pinata      PinningService = "pinata"
-	Web3Storage                = "web3.storage"
-	Other                      = "other"
+	Web3Storage PinningService = "web3.storage"
+	Other       PinningService = "other"
 )
 
 func (f PinningService) GetPinningServiceBaseUrl() string {
