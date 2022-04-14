@@ -39,12 +39,11 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	defer carf.Close()
-
 	log.Printf("car file location: %s\n", carf.Name())
 
 	err = node.CarExporter().Export(ctx, fcid, carf)
 	if err != nil {
+		carf.Close()
 		log.Fatalf("%v", err)
 	}
 
