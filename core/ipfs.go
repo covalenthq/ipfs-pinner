@@ -9,15 +9,12 @@ import (
 
 	config "github.com/ipfs/go-ipfs/config"
 	"github.com/ipfs/go-ipfs/core"
-	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
-	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 // returns a go-ipfs node backend CoreAPI instance
-func CreateIpfsCoreApi(cidComputeOnly bool) (coreiface.CoreAPI, error) {
+func CreateIpfsNnode(cidComputeOnly bool) (*core.IpfsNode, error) {
 	cfg := core.BuildCfg{
 		Online:    false, //networking off
 		Permanent: false, // want node to be lightweight
@@ -52,7 +49,8 @@ func CreateIpfsCoreApi(cidComputeOnly bool) (coreiface.CoreAPI, error) {
 	if nnode, err = core.NewNode(context.Background(), &cfg); err != nil {
 		return nil, err
 	}
-	return coreapi.NewCoreAPI(nnode, options.Api.Offline(true), options.Api.FetchBlocks(false))
+
+	return nnode, err
 }
 
 func initIpfsRepo() (string, error) {

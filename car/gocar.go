@@ -6,18 +6,18 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
 	gocar "github.com/ipld/go-car"
 	selectorparse "github.com/ipld/go-ipld-prime/traversal/selector/parse"
 )
 
 // implements the CarExporterAPI
 type carExporter struct {
-	api coreiface.CoreAPI
+	api coreapi.CoreExtensionAPI
 }
 
-func NewCarExporter(api coreiface.CoreAPI) CarExporterAPI {
+func NewCarExporter(api coreapi.CoreExtensionAPI) CarExporterAPI {
 	return &carExporter{api}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"syscall"
 
 	pinner "github.com/covalenthq/ipfs-pinner"
 	"github.com/covalenthq/ipfs-pinner/core"
@@ -39,6 +40,11 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
+	err = syscall.Unlink(carf.Name())
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	log.Printf("car file location: %s\n", carf.Name())
 
 	err = node.CarExporter().Export(ctx, fcid, carf)
@@ -53,8 +59,16 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
+	carf.Close() // should delete the file due to unlink
+
 	assertEquals(fcid, ccid)
 	log.Printf("the two cids match: %s\n", ccid.String())
+
+	log.Printf("removing dag...")
+	err = node.UnixfsService().RemoveDag(ctx, ccid)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {

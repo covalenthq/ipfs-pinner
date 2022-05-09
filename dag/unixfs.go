@@ -2,20 +2,21 @@ package dag
 
 import (
 	"context"
+	"fmt"
 	"io"
 
+	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 type unixfsApi struct {
-	ipfs       coreiface.CoreAPI
+	ipfs       coreapi.CoreExtensionAPI
 	addOptions []options.UnixfsAddOption
 }
 
-func NewUnixfsAPI(ipfs coreiface.CoreAPI, cidVersion int, cidGenerationOnly bool) UnixfsAPI {
+func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOnly bool) UnixfsAPI {
 	api := unixfsApi{}
 	api.addOptions = append(api.addOptions, options.Unixfs.CidVersion(cidVersion))
 	api.addOptions = append(api.addOptions, options.Unixfs.HashOnly(cidGenerationOnly))
@@ -30,4 +31,21 @@ func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Ci
 		return cid.Undef, err
 	}
 	return rpath.Cid(), nil
+}
+
+func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
+	pinCh, err := api.ipfs.Pin().Ls(ctx, options.Pin.Ls.Recursive())
+	if err != nil {
+		return fmt.Errorf("error in recursive ls for freeing dag: %v", err)
+	}
+
+	pin := <-pinCh
+
+	err = api.ipfs.Pin().Rm(ctx, pin.Path(), options.Pin.RmRecursive(true))
+	if err != nil {
+		return fmt.Errorf("error removing pin recursively: %v", err)
+	}
+
+	api.ipfs.GC().GarbageCollect(ctx)
+	return nil
 }

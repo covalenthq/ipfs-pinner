@@ -7,16 +7,16 @@ package pinner
 import (
 	car "github.com/covalenthq/ipfs-pinner/car"
 	"github.com/covalenthq/ipfs-pinner/core"
+	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/covalenthq/ipfs-pinner/dag"
 	"github.com/covalenthq/ipfs-pinner/pinclient"
 	logging "github.com/ipfs/go-log/v2"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
 )
 
 var logger = logging.Logger("ipfs-pinner")
 
 type pinnerNode struct {
-	ipfsCore      coreiface.CoreAPI
+	ipfsCore      coreapi.CoreExtensionAPI
 	carExporter   car.CarExporterAPI
 	unixfsService dag.UnixfsAPI
 	pinApiClient  pinclient.PinServiceAPI
@@ -24,10 +24,12 @@ type pinnerNode struct {
 
 func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
 	node := pinnerNode{}
-	var err error
-	if node.ipfsCore, err = core.CreateIpfsCoreApi(req.cidComputeOnly); err != nil {
+	ipfsNode, err := core.CreateIpfsNnode(req.cidComputeOnly)
+	if err != nil {
 		logger.Fatal("error initializing ipfs node: ", err)
 	}
+
+	node.ipfsCore = coreapi.NewCoreExtensionApi(ipfsNode)
 
 	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest, req.cidVersion)
 	node.carExporter = car.NewCarExporter(node.ipfsCore)
