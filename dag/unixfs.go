@@ -20,6 +20,7 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	api := unixfsApi{}
 	api.addOptions = append(api.addOptions, options.Unixfs.CidVersion(cidVersion))
 	api.addOptions = append(api.addOptions, options.Unixfs.HashOnly(cidGenerationOnly))
+	api.addOptions = append(api.addOptions, options.Unixfs.Pin(!cidGenerationOnly))
 	api.ipfs = ipfs
 	return &api
 }
@@ -40,6 +41,10 @@ func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
 	}
 
 	pin := <-pinCh
+
+	if pin == nil {
+		return fmt.Errorf("no pin found while removing dag")
+	}
 
 	err = api.ipfs.Pin().Rm(ctx, pin.Path(), options.Pin.RmRecursive(true))
 	if err != nil {
