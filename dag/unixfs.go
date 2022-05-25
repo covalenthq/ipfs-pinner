@@ -9,6 +9,7 @@ import (
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/interface-go-ipfs-core/options"
+	"github.com/ipfs/interface-go-ipfs-core/path"
 )
 
 type unixfsApi struct {
@@ -35,18 +36,12 @@ func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Ci
 }
 
 func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
-	pinCh, err := api.ipfs.Pin().Ls(ctx, options.Pin.Ls.Recursive())
+	rp, err := api.ipfs.ResolvePath(ctx, path.New(cid.String()))
 	if err != nil {
-		return fmt.Errorf("error in recursive ls for freeing dag: %v", err)
+		return err
 	}
 
-	pin := <-pinCh
-
-	if pin == nil {
-		return fmt.Errorf("no pin found while removing dag")
-	}
-
-	err = api.ipfs.Pin().Rm(ctx, pin.Path(), options.Pin.RmRecursive(true))
+	err = api.ipfs.Pin().Rm(ctx, rp, options.Pin.RmRecursive(true))
 	if err != nil {
 		return fmt.Errorf("error removing pin recursively: %v", err)
 	}

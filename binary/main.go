@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"syscall"
+	"time"
 
 	pinner "github.com/covalenthq/ipfs-pinner"
 	"github.com/covalenthq/ipfs-pinner/core"
@@ -65,7 +66,10 @@ func main() {
 	log.Printf("the two cids match: %s\n", ccid.String())
 
 	log.Printf("removing dag...")
+	curr := time.Now().UnixMilli()
 	err = node.UnixfsService().RemoveDag(ctx, ccid)
+	after := time.Now().UnixMilli()
+	log.Println("time taken:", after-curr)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
