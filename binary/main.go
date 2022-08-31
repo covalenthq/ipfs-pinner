@@ -16,7 +16,7 @@ import (
 var WEB3_JWT = "WEB3_JWT"
 var UPLOAD_FILE = "temp.txt"
 
-func pinningHandler(address string) http.Handler {
+func pinningHandler(address string, node pinner.PinnerNode) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
@@ -24,15 +24,7 @@ func pinningHandler(address string) http.Handler {
 			address = addr
 		}
 
-		token, present := os.LookupEnv(WEB3_JWT)
-		if !present {
-			log.Fatalf("token (%s) not found in env", WEB3_JWT)
-		}
 		ctx := context.Background()
-		clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
-		// check if cid compute true works with car uploads
-		nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
-		node := pinner.NewPinnerNode(*nodeCreateReq)
 
 		file, err := os.Open(address)
 		if err != nil {
@@ -92,7 +84,17 @@ func pinningHandler(address string) http.Handler {
 func main() {
 	mux := http.NewServeMux()
 
-	th := pinningHandler(UPLOAD_FILE)
+	token, present := os.LookupEnv(WEB3_JWT)
+	if !present {
+		log.Fatalf("token (%s) not found in env", WEB3_JWT)
+	}
+
+	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+	// check if cid compute true works with car uploads
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
+	node := pinner.NewPinnerNode(*nodeCreateReq)
+
+	th := pinningHandler(UPLOAD_FILE, node)
 	mux.Handle("/pin", th)
 
 	log.Print("Listening...")
