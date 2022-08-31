@@ -93,10 +93,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	th := pinningHandler(UPLOAD_FILE)
-	mux.Handle("/time", th)
+	mux.Handle("/pin", th)
 
 	log.Print("Listening...")
-	http.ListenAndServe(":3001", mux)
+	http.ListenAndServe(":3000", mux)
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {
