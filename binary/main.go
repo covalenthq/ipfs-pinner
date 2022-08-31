@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -13,66 +14,89 @@ import (
 )
 
 var WEB3_JWT = "WEB3_JWT"
-var UPLOAD_FILE = "/Users/sudeep/Downloads/data.out"
+var UPLOAD_FILE = "temp.txt"
+
+func pinningHandler(address string) http.Handler {
+
+	fn := func(w http.ResponseWriter, r *http.Request) {
+
+		if addr := r.FormValue("address"); addr != "" {
+			address = addr
+		}
+
+		token, present := os.LookupEnv(WEB3_JWT)
+		if !present {
+			log.Fatalf("token (%s) not found in env", WEB3_JWT)
+		}
+		ctx := context.Background()
+		clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+		// check if cid compute true works with car uploads
+		nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
+		node := pinner.NewPinnerNode(*nodeCreateReq)
+
+		file, err := os.Open(address)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		fcid, err := node.UnixfsService().GenerateDag(ctx, file)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		carf, err := os.CreateTemp(os.TempDir(), "*.car")
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		err = syscall.Unlink(carf.Name())
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		log.Printf("car file location: %s\n", carf.Name())
+
+		err = node.CarExporter().Export(ctx, fcid, carf)
+		if err != nil {
+			carf.Close()
+			log.Fatalf("%v", err)
+		}
+
+		carf.Seek(0, 0) // reset for read
+		ccid, err := node.PinService().UploadFile(ctx, carf)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		carf.Close() // should delete the file due to unlink
+
+		assertEquals(fcid, ccid)
+		log.Printf("the two cids match: %s\n", ccid.String())
+
+		w.Write([]byte(ccid.String()))
+
+		log.Printf("removing dag...")
+		curr := time.Now().UnixMilli()
+		err = node.UnixfsService().RemoveDag(ctx, ccid)
+		after := time.Now().UnixMilli()
+		log.Println("time taken:", after-curr)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+	}
+
+	return http.HandlerFunc(fn)
+
+}
 
 func main() {
+	mux := http.NewServeMux()
 
-	token, present := os.LookupEnv(WEB3_JWT)
-	if !present {
-		log.Fatalf("token (%s) not found in env", WEB3_JWT)
-	}
-	ctx := context.Background()
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
-	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
-	node := pinner.NewPinnerNode(*nodeCreateReq)
+	th := pinningHandler(UPLOAD_FILE)
+	mux.Handle("/time", th)
 
-	file, err := os.Open(UPLOAD_FILE)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	fcid, err := node.UnixfsService().GenerateDag(ctx, file)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	carf, err := os.CreateTemp(os.TempDir(), "*.car")
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	err = syscall.Unlink(carf.Name())
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	log.Printf("car file location: %s\n", carf.Name())
-
-	err = node.CarExporter().Export(ctx, fcid, carf)
-	if err != nil {
-		carf.Close()
-		log.Fatalf("%v", err)
-	}
-
-	carf.Seek(0, 0) // reset for read
-	ccid, err := node.PinService().UploadFile(ctx, carf)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	carf.Close() // should delete the file due to unlink
-
-	assertEquals(fcid, ccid)
-	log.Printf("the two cids match: %s\n", ccid.String())
-
-	log.Printf("removing dag...")
-	curr := time.Now().UnixMilli()
-	err = node.UnixfsService().RemoveDag(ctx, ccid)
-	after := time.Now().UnixMilli()
-	log.Println("time taken:", after-curr)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
+	log.Print("Listening...")
+	http.ListenAndServe(":3001", mux)
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {
