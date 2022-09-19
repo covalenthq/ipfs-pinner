@@ -82,6 +82,14 @@ func pinningHandler(address string, node pinner.PinnerNode) http.Handler {
 }
 
 func main() {
+	port_number := os.Args[1]
+
+	println(port_number)
+
+	setUpAndRunServer(port_number)
+}
+
+func setUpAndRunServer(port_number string) {
 	mux := http.NewServeMux()
 
 	token, present := os.LookupEnv(WEB3_JWT)
@@ -98,7 +106,7 @@ func main() {
 	mux.Handle("/pin", th)
 
 	log.Print("Listening...")
-	http.ListenAndServe(":3000", mux)
+	http.ListenAndServe(":"+port_number, mux)
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {
