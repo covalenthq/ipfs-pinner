@@ -6,3 +6,6 @@
 ### generate go http client go bindings via openapi
 - use `./generate_gobindings.sh` to generate the golang bindings (for pinning services of pinata and web3.storage). 
 - There are some fixes you would need to do (missing braces etc.)
+
+### Run the server
+go run main.go -port "3000" -file "file address" -jwt "your jwt"
