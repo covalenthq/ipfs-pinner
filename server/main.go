@@ -24,7 +24,7 @@ func main() {
 	token := flag.String("jwt", "", "jwt token for web3.storage")
 	// port_number := os.Args[1]
 
-	println(port_number)
+	flag.Parse()
 
 	setUpAndRunServer(*port_number, *UPLOAD_FILE, *token)
 }
