@@ -1,4 +1,4 @@
-package binary
+package main
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 var WEB3_JWT = "WEB3_JWT"
 var UPLOAD_FILE = "temp.txt"
 
-func myHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
+func pinningCoreHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
 
 	ctx := context.Background()
 
@@ -76,7 +76,7 @@ func PinningHandler(address string, node pinner.PinnerNode) http.Handler {
 		if addr := r.FormValue("address"); addr != "" {
 			address = addr
 		}
-		ccid := myHandleFunc(address, node)
+		ccid := pinningCoreHandleFunc(address, node)
 		w.Write([]byte(ccid.String()))
 	}
 	return http.HandlerFunc(fn)
@@ -92,7 +92,7 @@ func main() {
 	// check if cid compute true works with car uploads
 	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)
-	myHandleFunc(UPLOAD_FILE, node)
+	pinningCoreHandleFunc(UPLOAD_FILE, node)
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {

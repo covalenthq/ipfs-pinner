@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -22,16 +23,16 @@ var WEB3_JWT = "WEB3_JWT"
 // run this: go run main.go "3000"
 func main() {
 
-	port_number := flag.String("port", "3000", "port number for the server")
+	portNumber := flag.Int("port", 3000, "port number for the server")
 	token := flag.String("jwt", "", "jwt token for web3.storage")
-	// port_number := os.Args[1]
+	// portNumber := os.Args[1]
 
 	flag.Parse()
 
-	setUpAndRunServer(*port_number, *token)
+	setUpAndRunServer(*portNumber, *token)
 }
 
-func setUpAndRunServer(port_number string, token string) {
+func setUpAndRunServer(portNumber int, token string) {
 	mux := http.NewServeMux()
 	if token == "" {
 		var present bool
@@ -50,42 +51,42 @@ func setUpAndRunServer(port_number string, token string) {
 	mux.Handle("/pin", th)
 
 	log.Print("Listening...")
-	http.ListenAndServe(":"+port_number, mux)
+	http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
 }
 
 func PinningHandler(node pinner.PinnerNode) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if addr := r.FormValue("address"); addr != "" {
-			address := addr
-			ccid := recovery_wrapper(address, node)
-			if ccid.String() == "b"{
+		if fp := r.FormValue("filePath"); fp != "" {
+			filePath := fp
+			ccid := recoveryWrapper(filePath, node)
+			if len(ccid.String()) != 46 {
 				w.Write([]byte("no cid generated"))
 			} else {
-			w.Write([]byte(ccid.String()))
+				w.Write([]byte(ccid.String()))
 			}
 		} else {
-			fmt.Println("Please provide a file address for pinning! No file address found in the request.")
+			fmt.Println("Please provide a file filePath for pinning! No file filePath found in the request.")
 		}
 	}
 	return http.HandlerFunc(fn)
 }
 
-func recovery_wrapper(address string, node pinner.PinnerNode) cid.Cid {
+func recoveryWrapper(filePath string, node pinner.PinnerNode) cid.Cid {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("panic occurred:", err)
 		}
 	}()
-	return myHandleFunc(address, node)
+	return pinningCoreHandleFunc(filePath, node)
 }
 
-func myHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
+func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) cid.Cid {
 	ctx := context.Background()
 
 	ccid := cid.Cid{}
 
-	file, err := os.Open(address)
+	file, err := os.Open(filePath)
 	if err != nil {
 		log.Printf("%v", err)
 		panic(err)
