@@ -20,7 +20,6 @@ import (
 
 var WEB3_JWT = "WEB3_JWT"
 
-// run this: go run main.go "3000"
 func main() {
 
 	portNumber := flag.Int("port", 3000, "port number for the server")
