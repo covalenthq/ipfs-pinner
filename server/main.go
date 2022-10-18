@@ -21,13 +21,10 @@ import (
 var WEB3_JWT = "WEB3_JWT"
 
 func main() {
-
 	portNumber := flag.Int("port", 3000, "port number for the server")
-	token := flag.String("jwt", "", "jwt token for web3.storage")
-	// portNumber := os.Args[1]
+	token := flag.String("jwt", "", "JWT token for web3.storage")
 
 	flag.Parse()
-
 	setUpAndRunServer(*portNumber, *token)
 }
 
@@ -54,15 +51,19 @@ func setUpAndRunServer(portNumber int, token string) {
 }
 
 func PinningHandler(node pinner.PinnerNode) http.Handler {
-
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if fp := r.FormValue("filePath"); fp != "" {
 			filePath := fp
-			ccid := recoveryWrapper(filePath, node)
-			if len(ccid.String()) != 46 {
-				w.Write([]byte("no cid generated"))
+			ccid, err := recoveryWrapper(filePath, node)
+			if err != nil {
+				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
+				w.Write([]byte(err_str))
+			} else if len(ccid.String()) != 46 {
+				err_str := "{\"error\": \"invalid cid generated\"}"
+				w.Write([]byte(err_str))
 			} else {
-				w.Write([]byte(ccid.String()))
+				succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
+				w.Write([]byte(succ_str))
 			}
 		} else {
 			fmt.Println("Please provide a file filePath for pinning! No file filePath found in the request.")
@@ -71,7 +72,7 @@ func PinningHandler(node pinner.PinnerNode) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func recoveryWrapper(filePath string, node pinner.PinnerNode) cid.Cid {
+func recoveryWrapper(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("panic occurred:", err)
@@ -80,7 +81,7 @@ func recoveryWrapper(filePath string, node pinner.PinnerNode) cid.Cid {
 	return pinningCoreHandleFunc(filePath, node)
 }
 
-func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) cid.Cid {
+func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
 	ctx := context.Background()
 
 	ccid := cid.Cid{}
@@ -88,24 +89,26 @@ func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) cid.Cid {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
 	fcid, err := node.UnixfsService().GenerateDag(ctx, file)
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
 
 	carf, err := os.CreateTemp(os.TempDir(), "*.car")
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
+
+	defer carf.Close() // should delete the file due to unlink
 
 	err = syscall.Unlink(carf.Name())
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
 
 	log.Printf("car file location: %s\n", carf.Name())
@@ -114,20 +117,17 @@ func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) cid.Cid {
 	if err != nil {
 		carf.Close()
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
 
 	carf.Seek(0, 0) // reset for read
 	ccid, err = node.PinService().UploadFile(ctx, carf)
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
+		return cid.Undef, err
 	}
 
-	carf.Close() // should delete the file due to unlink
-
-	assertEquals(fcid, ccid)
-	log.Printf("the two cids match: %s\n", ccid.String())
+	carf.Close()
 
 	log.Printf("removing dag...")
 	curr := time.Now().UnixMilli()
@@ -136,14 +136,7 @@ func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) cid.Cid {
 	log.Println("time taken:", after-curr)
 	if err != nil {
 		log.Printf("%v", err)
-		panic(err)
 	}
 
-	return ccid
-}
-
-func assertEquals(obj1 interface{}, obj2 interface{}) {
-	if obj1 != obj2 {
-		log.Printf("fail %v and %v doesn't match", obj1, obj2)
-	}
+	return ccid, nil
 }
