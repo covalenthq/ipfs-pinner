@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -10,24 +11,17 @@ import (
 	pinner "github.com/covalenthq/ipfs-pinner"
 	"github.com/covalenthq/ipfs-pinner/core"
 	client "github.com/covalenthq/ipfs-pinner/pinclient"
+	"github.com/ipfs/go-cid"
 )
 
 var WEB3_JWT = "WEB3_JWT"
-var UPLOAD_FILE = "/Users/sudeep/Downloads/data.out"
+var UPLOAD_FILE = "temp.txt"
 
-func main() {
+func pinningCoreHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
 
-	token, present := os.LookupEnv(WEB3_JWT)
-	if !present {
-		log.Fatalf("token (%s) not found in env", WEB3_JWT)
-	}
 	ctx := context.Background()
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
-	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
-	node := pinner.NewPinnerNode(*nodeCreateReq)
 
-	file, err := os.Open(UPLOAD_FILE)
+	file, err := os.Open(address)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
@@ -73,6 +67,32 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	return ccid
+}
+
+func PinningHandler(address string, node pinner.PinnerNode) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		if addr := r.FormValue("address"); addr != "" {
+			address = addr
+		}
+		ccid := pinningCoreHandleFunc(address, node)
+		w.Write([]byte(ccid.String()))
+	}
+	return http.HandlerFunc(fn)
+}
+
+func main() {
+	token, present := os.LookupEnv(WEB3_JWT)
+	if !present {
+		log.Fatalf("token (%s) not found in env", WEB3_JWT)
+	}
+
+	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+	// check if cid compute true works with car uploads
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
+	node := pinner.NewPinnerNode(*nodeCreateReq)
+	pinningCoreHandleFunc(UPLOAD_FILE, node)
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {
