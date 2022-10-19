@@ -1,0 +1,34 @@
+name: docker-ci-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.CR_USER }}
+          password: ${{ secrets.CR_PAT }}
+
+      - uses: actions/checkout@v2
+      - name: Build & Publish the Docker image
+        run: |
+          docker build . --file Dockerfile --tag ghcr.io/covalenthq/ipfs-pinner:latest
+          docker push ghcr.io/covalenthq/ipfs-pinner:latest;
+
+      - name: Start Container
+        run: docker run -p 3001:3001 -it --name pinner-instance ipfs-pinner;
+
+      - name: Check Running Container
+        run: docker inspect pinner-instance;
+
+      - name: Stop containers
+        if: always()
+        run: docker stop $(docker ps -aq)
