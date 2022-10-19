@@ -2,6 +2,7 @@ FROM golang:1.17-alpine
 COPY . /usr/src/app/temp
 
 COPY entry.sh /usr/src/app
+COPY ./server/temp.txt /usr/src/app
 
 WORKDIR /usr/src/app
 RUN cd temp && go mod download
