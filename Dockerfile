@@ -1,7 +1,6 @@
-# Build - first phase.
-FROM golang:1.17-alpine as builder
+FROM golang:1.17-alpine
 COPY . /usr/src/app
-COPY entry.sh /usr/local/bin
+COPY entry.sh /usr/src/app
 
 WORKDIR /usr/src/app
 RUN go mod download
@@ -18,3 +17,4 @@ RUN chmod +x ./built/server
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 CMD [ "./entry.sh" ]
+EXPOSE 3001:3001
