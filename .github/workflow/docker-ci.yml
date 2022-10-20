@@ -10,18 +10,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ secrets.CR_USER }}
-          password: ${{ secrets.CR_PAT }}
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
 
       - uses: actions/checkout@v2
       - name: Build & Publish the Docker image
         run: |
-          docker build . --file Dockerfile --tag ghcr.io/covalenthq/ipfs-pinner:latest
-          docker push ghcr.io/covalenthq/ipfs-pinner:latest;
+          docker buildx create --name builder --use --platform=linux/amd64,linux/arm64  && docker buildx build --platform=linux/amd64,linux/arm64 . -t gcr.io/covalent-project/ipfs-pinner:latest --push
+
 
       - name: Start Container
         run: docker run -p 3001:3001 -it --name pinner-instance ipfs-pinner;
