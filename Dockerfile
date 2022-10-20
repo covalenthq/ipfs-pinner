@@ -12,7 +12,7 @@ RUN cd temp/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../../se
 RUN apk update && apk add --no-cache bash
 
 SHELL ["/bin/bash", "-c"]
-EXPOSE 3001:3001
+EXPOSE 3001
 
 RUN chmod +x entry.sh
 RUN chmod +x ./server
