@@ -7,7 +7,6 @@ import (
 	icore "github.com/ipfs/go-ipfs/core/coreapi"
 	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
 	coreiface "github.com/ipfs/interface-go-ipfs-core"
-	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 type coreApiImpl struct {
@@ -17,9 +16,8 @@ type coreApiImpl struct {
 
 func NewCoreExtensionApi(ipfsNode *core.IpfsNode) CoreExtensionAPI {
 	impl := &coreApiImpl{}
-	//impl.gci = &garbageCollectorImpl{node: }
 	impl.gci = &garbageCollectorImpl{node: ipfsNode}
-	impl.CoreAPI, _ = icore.NewCoreAPI(ipfsNode, options.Api.Offline(true), options.Api.FetchBlocks(false))
+	impl.CoreAPI, _ = icore.NewCoreAPI(ipfsNode)
 	return impl
 }
 

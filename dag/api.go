@@ -7,7 +7,7 @@ import (
 	"github.com/ipfs/go-cid"
 )
 
-// generate the merkle dag from content provided by the reader.
+// merkle dag manipulator.
 // There are various ways to generate merkle dag for some content. The implementors
 // of this interface should capture those settings. Note that this means that those
 // settings remain the same for an instance (across all requests on that instance).
@@ -20,4 +20,12 @@ type UnixfsAPI interface {
 	// this would also do a GC in order to make the space immediately
 	// available
 	RemoveDag(ctx context.Context, cid cid.Cid) error
+
+	// get the data stored in ipfs referenced by cid.
+	// If the node is online (networking enabled), this would also search
+	// in other ipfs nodes (using bitswap).
+	// If the dag is cleaned up from local store, it might take time for the
+	// data to be pinned/available on remote nodes, which means that a "upload"
+	// followed immediately by a "get" might not work.
+	Get(ctx context.Context, cid cid.Cid) ([]byte, error)
 }
