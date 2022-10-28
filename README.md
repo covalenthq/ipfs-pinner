@@ -25,3 +25,24 @@ go run main.go -port 3000 -jwt "<jwt_token>"
 ➜ curl -XGET http://127.0.0.1:3000/pin\?filePath\=not_exist_file
 {"error": "open not_exist_file: no such file or directory"}
 ```
+
+there's a timeout (check code for value), on timeout the error message returned is:
+```bash
+{"error": "context deadline exceeded"}
+```
+
+- download a file
+if the request succeeds the raw content is sent back and it can be outputted in a file using curl. e.g.
+```bash
+➜ curl -XGET http://127.0.0.1:3000/get\?cid\=bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u --output file.jpeg
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  806k    0  806k    0     0  91.2M      0 --:--:-- --:--:-- --:--:--  262M
+```
+
+Now, if the data is present in local ipfs store, it'll be returned from there. Otherwise, it has to interact with other IPFS peers to find 
+and fetch the data.
+There's a timeout (check code for value) for the download request, if it doesn't succeed in that time, the error message returned is:
+```bash
+{"error": "context deadline exceeded"}
+```

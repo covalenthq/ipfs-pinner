@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -18,7 +19,12 @@ import (
 	client "github.com/covalenthq/ipfs-pinner/pinclient"
 )
 
-var WEB3_JWT = "WEB3_JWT"
+var (
+	emptyBytes       = []byte("")
+	WEB3_JWT         = "WEB3_JWT"
+	DOWNLOAD_TIMEOUT = 12 * time.Minute // download can take a lot of time if it's not locally present
+	UPLOAD_TIMEOUT   = 60 * time.Second // uploads of around 6MB files happen in less than 10s typically
+)
 
 func main() {
 	portNumber := flag.Int("port", 3000, "port number for the server")
@@ -40,26 +46,22 @@ func setUpAndRunServer(portNumber int, token string) {
 
 	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(1).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)
 
-	th := PinningHandler(node)
-	mux.Handle("/pin", th)
+	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))
+	mux.Handle("/get", recoveryWrapper(downloadHttpHandler(node)))
 
 	log.Print("Listening...")
 	http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
 }
 
-func PinningHandler(node pinner.PinnerNode) http.Handler {
+func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if fp := r.FormValue("filePath"); fp != "" {
-			filePath := fp
-			ccid, err := recoveryWrapper(filePath, node)
+		if filePath := r.FormValue("filePath"); filePath != "" {
+			ccid, err := uploadHandler(filePath, node)
 			if err != nil {
 				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
-				w.Write([]byte(err_str))
-			} else if len(ccid.String()) != 46 {
-				err_str := "{\"error\": \"invalid cid generated\"}"
 				w.Write([]byte(err_str))
 			} else {
 				succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
@@ -72,19 +74,51 @@ func PinningHandler(node pinner.PinnerNode) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func recoveryWrapper(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("panic occurred:", err)
+func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		if cidStr := r.FormValue("cid"); cidStr != "" {
+			contents, err := downloadHandler(cidStr, node)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
+				w.Write([]byte(err_str))
+			} else {
+				w.Write(contents)
+			}
+		} else {
+			fmt.Println("Please provide a cid for fetching!")
 		}
-	}()
-	return pinningCoreHandleFunc(filePath, node)
+	}
+
+	return http.HandlerFunc(fn)
 }
 
-func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
-	ctx := context.Background()
+func recoveryWrapper(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			r := recover()
+			if r != nil {
+				var err error
+				switch t := r.(type) {
+				case string:
+					err = errors.New(t)
+				case error:
+					err = t
+				default:
+					err = errors.New("unknown error")
+				}
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}()
+		h.ServeHTTP(w, r)
+	})
+}
 
-	ccid := cid.Cid{}
+func uploadHandler(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), UPLOAD_TIMEOUT)
+	defer cancel()
+
+	var ccid cid.Cid
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -128,15 +162,16 @@ func pinningCoreHandleFunc(filePath string, node pinner.PinnerNode) (cid.Cid, er
 	}
 
 	carf.Close()
-
-	log.Printf("removing dag...")
-	curr := time.Now().UnixMilli()
-	err = node.UnixfsService().RemoveDag(ctx, ccid)
-	after := time.Now().UnixMilli()
-	log.Println("time taken:", after-curr)
-	if err != nil {
-		log.Printf("%v", err)
-	}
-
 	return ccid, nil
+}
+
+func downloadHandler(cidStr string, node pinner.PinnerNode) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), DOWNLOAD_TIMEOUT)
+	defer cancel()
+
+	cid, err := cid.Parse(cidStr)
+	if err != nil {
+		return emptyBytes, err
+	}
+	return node.UnixfsService().Get(ctx, cid)
 }

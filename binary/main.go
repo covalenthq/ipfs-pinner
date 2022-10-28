@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -15,13 +14,25 @@ import (
 )
 
 var WEB3_JWT = "WEB3_JWT"
-var UPLOAD_FILE = "temp.txt"
+var UPLOAD_FILE = "./main.go" // uploading current file itself
 
-func pinningCoreHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
+func main() {
+	token, present := os.LookupEnv(WEB3_JWT)
+	if !present {
+		log.Fatalf("token (%s) not found in env", WEB3_JWT)
+	}
 
+	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+	// check if cid compute true works with car uploads
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(1).CidComputeOnly(false)
+	node := pinner.NewPinnerNode(*nodeCreateReq)
 	ctx := context.Background()
+	//upload(ctx, node)
+	download(ctx, node)
+}
 
-	file, err := os.Open(address)
+func upload(ctx context.Context, node pinner.PinnerNode) {
+	file, err := os.Open(UPLOAD_FILE)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
@@ -67,32 +78,25 @@ func pinningCoreHandleFunc(address string, node pinner.PinnerNode) cid.Cid {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-
-	return ccid
 }
 
-func PinningHandler(address string, node pinner.PinnerNode) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		if addr := r.FormValue("address"); addr != "" {
-			address = addr
-		}
-		ccid := pinningCoreHandleFunc(address, node)
-		w.Write([]byte(ccid.String()))
-	}
-	return http.HandlerFunc(fn)
-}
+func download(ctx context.Context, node pinner.PinnerNode) {
+	//ccid, err := cid.Parse("bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u") // file encapsulated in folder
+	//ccid, err := cid.Parse("QmeFd8e4UaAPrPnwxBWcpqY3tMpggpWB3XYqftMpyYYLWZ") // straight up file
 
-func main() {
-	token, present := os.LookupEnv(WEB3_JWT)
-	if !present {
-		log.Fatalf("token (%s) not found in env", WEB3_JWT)
-	}
+	ccid, err := cid.Parse("bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u")
+	//ccid, err := cid.Parse("bafybeic7nbudupk56j2ixdrczddzmuu3qtmlyrpqjxuy4jkaeeaminxq3e") // took about 12-15 minutes
 
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
-	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(0).CidComputeOnly(false)
-	node := pinner.NewPinnerNode(*nodeCreateReq)
-	pinningCoreHandleFunc(UPLOAD_FILE, node)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	log.Printf("searching for pid: %v\n", ccid)
+	contents, err := node.UnixfsService().Get(ctx, ccid)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	// print the first 20 characters to prevent polluting the terminal.
+	log.Println(string(contents)[:20])
 }
 
 func assertEquals(obj1 interface{}, obj2 interface{}) {

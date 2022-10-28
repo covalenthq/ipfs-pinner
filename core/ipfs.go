@@ -9,6 +9,7 @@ import (
 
 	config "github.com/ipfs/go-ipfs/config"
 	"github.com/ipfs/go-ipfs/core"
+	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 )
@@ -16,14 +17,17 @@ import (
 // returns a go-ipfs node backend CoreAPI instance
 func CreateIpfsNnode(cidComputeOnly bool) (*core.IpfsNode, error) {
 	cfg := core.BuildCfg{
-		Online:    false, //networking off
-		Permanent: false, // want node to be lightweight
+		Online:    !cidComputeOnly, // networking
+		Permanent: !cidComputeOnly, // data persists across restarts?
 	}
 
 	var err error
 	if cidComputeOnly {
 		cfg.NilRepo = true
 	} else {
+		cfg.Routing = libp2p.DHTOption
+		cfg.Host = libp2p.DefaultHostOption
+
 		var repoPath string
 		if repoPath, err = initIpfsRepo(); err != nil {
 			return nil, err
