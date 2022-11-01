@@ -1,0 +1,7 @@
+.git
+.dockerignore
+.github
+.vscode
+
+.DS_Store
+server/server
