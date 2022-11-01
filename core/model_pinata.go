@@ -143,8 +143,6 @@ func (s Status) String() string {
 	}
 }
 
-var validStatuses = []Status{"queued", "pinning", "pinned", "failed"}
-
 // PinStatusGetter Getter for Pin object with status
 type PinStatusGetter interface {
 	fmt.Stringer
