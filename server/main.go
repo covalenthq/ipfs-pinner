@@ -53,7 +53,10 @@ func setUpAndRunServer(portNumber int, token string) {
 	mux.Handle("/get", recoveryWrapper(downloadHttpHandler(node)))
 
 	log.Print("Listening...")
-	http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
+	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
+	if err != nil {
+		fmt.Println("error listening and serving on TCP network: %w", err)
+	}
 }
 
 func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
@@ -62,10 +65,16 @@ func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 			ccid, err := uploadHandler(filePath, node)
 			if err != nil {
 				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
-				w.Write([]byte(err_str))
+				_, err := w.Write([]byte(err_str))
+				if err != nil {
+					fmt.Println("error writing data to connection: %w", err)
+				}
 			} else {
 				succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
-				w.Write([]byte(succ_str))
+				_, err := w.Write([]byte(succ_str))
+				if err != nil {
+					fmt.Println("error writing data to connection: %w", err)
+				}
 			}
 		} else {
 			fmt.Println("Please provide a file filePath for pinning! No file filePath found in the request.")
@@ -81,9 +90,15 @@ func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
-				w.Write([]byte(err_str))
+				_, err := w.Write([]byte(err_str))
+				if err != nil {
+					fmt.Println("error writing data to connection: %w", err)
+				}
 			} else {
-				w.Write(contents)
+				_, err := w.Write(contents)
+				if err != nil {
+					fmt.Println("error writing data to connection: %w", err)
+				}
 			}
 		} else {
 			fmt.Println("Please provide a cid for fetching!")
@@ -154,7 +169,10 @@ func uploadHandler(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
 		return cid.Undef, err
 	}
 
-	carf.Seek(0, 0) // reset for read
+	_, err = carf.Seek(0, 0)
+	if err != nil {
+		fmt.Println("error writing data to connection: %w", err)
+	} // reset for read
 	ccid, err = node.PinService().UploadFile(ctx, carf)
 	if err != nil {
 		log.Printf("%v", err)

@@ -49,7 +49,10 @@ func (exp *carExporter) MultiExport(ctx context.Context, contentRoot cid.Cid, wr
 	}
 
 	for _, writer := range writers {
-		preparedScar.Dump(ctx, writer)
+		err := preparedScar.Dump(ctx, writer)
+		if err != nil {
+			fmt.Println("error writing car file: %w", err)
+		}
 	}
 
 	return nil
