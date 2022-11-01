@@ -1,22 +1,20 @@
-FROM golang:1.17-alpine
+# Build - first phase
+FROM golang:1.17-alpine as builder
+RUN mkdir /build
+WORKDIR /build
+COPY . .
+RUN go mod download && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
-COPY . /usr/src/app/repo
-
-WORKDIR /usr/src/app
-RUN cd repo && go mod download
-
-RUN cd repo/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../../server .
-RUN cd repo/server && go clean -modcache
-RUN rm -r /usr/src/app/repo
-
-RUN apk update && apk add --no-cache bash
-
+# Runtime -  second phase.
+FROM alpine:3.15.0
+RUN mkdir /app
+WORKDIR /app
+RUN apk update && apk add --no-cache bash=5.1.16-r0
+COPY --from=builder /build/ipfs-server /app
 SHELL ["/bin/bash", "-c"]
-
-RUN chmod +x ./server
-
+RUN chmod +x ./ipfs-server
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "./server -port 3000 -jwt $WEB3_JWT" ]
+CMD [ "./ipfs-server -port 3000 -jwt $WEB3_JWT" ]
 
 EXPOSE 3000
 # Swarm TCP; should be exposed to the public
