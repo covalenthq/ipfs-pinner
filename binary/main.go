@@ -1,3 +1,4 @@
+//nolint:deadcode,errcheck,unused
 package main
 
 import (
