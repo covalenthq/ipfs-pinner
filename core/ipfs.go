@@ -15,7 +15,7 @@ import (
 )
 
 // returns a go-ipfs node backend CoreAPI instance
-func CreateIpfsNnode(cidComputeOnly bool) (*core.IpfsNode, error) {
+func CreateIpfsNode(cidComputeOnly bool) (*core.IpfsNode, error) {
 	cfg := core.BuildCfg{
 		Online:    !cidComputeOnly, // networking
 		Permanent: !cidComputeOnly, // data persists across restarts?

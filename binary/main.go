@@ -85,8 +85,10 @@ func download(ctx context.Context, node pinner.PinnerNode) {
 	//ccid, err := cid.Parse("bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u") // file encapsulated in folder
 	//ccid, err := cid.Parse("QmeFd8e4UaAPrPnwxBWcpqY3tMpggpWB3XYqftMpyYYLWZ") // straight up file
 
-	ccid, err := cid.Parse("bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u")
-	//ccid, err := cid.Parse("bafybeic7nbudupk56j2ixdrczddzmuu3qtmlyrpqjxuy4jkaeeaminxq3e") // took about 12-15 minutes
+	//ccid, err := cid.Parse("bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u")
+	//ccid, err := cid.Parse("QmZrxsDZwrCKbcJLNf1D6GaX2fobHZpesBc3DwhVBLQ33p")
+	//ccid, err := cid.Parse("bafkreic7xhzqyube57gex7okhzytg7i5eq6fvz5snpte7swy547s22bs5q")
+	ccid, err := cid.Parse("bafybeic7nbudupk56j2ixdrczddzmuu3qtmlyrpqjxuy4jkaeeaminxq3e") // took about 12-15 minutes
 
 	if err != nil {
 		log.Fatalf("%v", err)
