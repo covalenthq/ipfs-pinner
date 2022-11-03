@@ -2,11 +2,14 @@ package dag
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
@@ -59,9 +62,21 @@ func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
 
 func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 	cidStr := cid.String()
-	fmt.Printf("unixfsApi: getting the cid: %s\n", cidStr)
-	node, err := api.ipfs.Unixfs().Get(ctx, path.New(cidStr))
-	if err != nil {
+	fmt.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
+
+	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	node, err := api.ipfs.Unixfs().Get(timeoutCtx, path.New(cidStr))
+
+	if errors.Is(err, context.DeadlineExceeded) {
+		fmt.Println("trying out dweb.link")
+		resp, err := http.Get(fmt.Sprintf("https://dweb.link/ipfs/%s", cidStr))
+		if err != nil {
+			return emptyBytes, err
+		}
+
+		return ioutil.ReadAll(resp.Body)
+	} else if err != nil {
 		return emptyBytes, err
 	}
 

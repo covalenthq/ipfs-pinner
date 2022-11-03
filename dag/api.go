@@ -24,6 +24,7 @@ type UnixfsAPI interface {
 	// get the data stored in ipfs referenced by cid.
 	// If the node is online (networking enabled), this would also search
 	// in other ipfs nodes (using bitswap).
+	// NOTE: there's a timeout on bitswap method, after which, http is attempted.
 	// If the dag is cleaned up from local store, it might take time for the
 	// data to be pinned/available on remote nodes, which means that a "upload"
 	// followed immediately by a "get" might not work.

@@ -24,7 +24,7 @@ type pinnerNode struct {
 
 func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
 	node := pinnerNode{}
-	ipfsNode, err := core.CreateIpfsNnode(req.cidComputeOnly)
+	ipfsNode, err := core.CreateIpfsNode(req.cidComputeOnly)
 	if err != nil {
 		logger.Fatal("error initializing ipfs node: ", err)
 	}
