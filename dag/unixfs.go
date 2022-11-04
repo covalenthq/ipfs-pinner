@@ -2,25 +2,26 @@ package dag
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
-	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
 	files "github.com/ipfs/go-ipfs-files"
+	ipldformat "github.com/ipfs/go-ipld-format"
+	coreiface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
 )
 
 type unixfsApi struct {
-	ipfs       coreapi.CoreExtensionAPI
-	addOptions []options.UnixfsAddOption
+	ipfs        coreapi.CoreExtensionAPI
+	offlineIpfs coreiface.CoreAPI
+	addOptions  []options.UnixfsAddOption
 }
 
 var (
@@ -33,6 +34,12 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	api.addOptions = append(api.addOptions, options.Unixfs.HashOnly(cidGenerationOnly))
 	api.addOptions = append(api.addOptions, options.Unixfs.Pin(!cidGenerationOnly))
 	api.ipfs = ipfs
+
+	var err error
+	api.offlineIpfs, err = api.ipfs.WithOptions(options.Api.Offline(true))
+	if err != nil {
+		log.Fatalf("failed to start offline ipfs core")
+	}
 	return &api
 }
 
@@ -61,14 +68,12 @@ func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
 }
 
 func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
+	// try fetching from local first, and if not found then go for dweb.link/ipfs instead of bitswap
 	cidStr := cid.String()
 	fmt.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-	node, err := api.ipfs.Unixfs().Get(timeoutCtx, path.New(cidStr))
-
-	if errors.Is(err, context.DeadlineExceeded) {
+	node, err := api.offlineIpfs.Unixfs().Get(ctx, path.New(cidStr))
+	if ipldformat.IsNotFound(err) {
 		fmt.Println("trying out dweb.link")
 		resp, err := http.Get(fmt.Sprintf("https://dweb.link/ipfs/%s", cidStr))
 		if err != nil {
@@ -77,6 +82,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 
 		return ioutil.ReadAll(resp.Body)
 	} else if err != nil {
+		fmt.Println("failed to fetch from offline")
 		return emptyBytes, err
 	}
 
