@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -59,25 +62,50 @@ func setUpAndRunServer(portNumber int, token string) {
 	}
 }
 
+func respondError(w http.ResponseWriter, err error) {
+	err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
+	w.WriteHeader(http.StatusInternalServerError)
+	_, err = w.Write([]byte(err_str))
+	if err != nil {
+		fmt.Println("error writing data to connection: %w", err)
+	}
+}
+
 func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if filePath := r.FormValue("filePath"); filePath != "" {
-			ccid, err := uploadHandler(filePath, node)
-			if err != nil {
-				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
-				_, err := w.Write([]byte(err_str))
-				if err != nil {
-					fmt.Println("error writing data to connection: %w", err)
-				}
-			} else {
-				succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
-				_, err := w.Write([]byte(succ_str))
-				if err != nil {
-					fmt.Println("error writing data to connection: %w", err)
-				}
+		mreader, err := r.MultipartReader()
+		if err != nil {
+			respondError(w, err)
+			return
+		}
+
+		var contents string = ""
+
+		for {
+			part, err := mreader.NextPart()
+			if err == io.EOF {
+				break
 			}
+
+			pcontents, err := ioutil.ReadAll(part)
+			if err != nil {
+				respondError(w, err)
+				return
+			}
+
+			contents += string(pcontents)
+		}
+
+		ccid, err := uploadHandler(contents, node)
+		if err != nil {
+			respondError(w, err)
+			return
 		} else {
-			fmt.Println("Please provide a file filePath for pinning! No file filePath found in the request.")
+			succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
+			_, err := w.Write([]byte(succ_str))
+			if err != nil {
+				fmt.Println("error writing data to connection: %w", err)
+			}
 		}
 	}
 	return http.HandlerFunc(fn)
@@ -88,12 +116,7 @@ func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
 		if cidStr := r.FormValue("cid"); cidStr != "" {
 			contents, err := downloadHandler(cidStr, node)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				err_str := fmt.Sprintf("{\"error\": \"%s\"}", err)
-				_, err := w.Write([]byte(err_str))
-				if err != nil {
-					fmt.Println("error writing data to connection: %w", err)
-				}
+				respondError(w, err)
 			} else {
 				_, err := w.Write(contents)
 				if err != nil {
@@ -129,22 +152,17 @@ func recoveryWrapper(h http.Handler) http.Handler {
 	})
 }
 
-func uploadHandler(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
+func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), UPLOAD_TIMEOUT)
 	defer cancel()
 
-	var ccid cid.Cid
+	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader([]byte(contents)))
+	if err != nil {
+		log.Printf("%v", err)
+		return cid.Undef, err
+	}
 
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Printf("%v", err)
-		return cid.Undef, err
-	}
-	fcid, err := node.UnixfsService().GenerateDag(ctx, file)
-	if err != nil {
-		log.Printf("%v", err)
-		return cid.Undef, err
-	}
+	fmt.Printf("generated dag has root cid: %s\n", fcid)
 
 	carf, err := os.CreateTemp(os.TempDir(), "*.car")
 	if err != nil {
@@ -173,11 +191,13 @@ func uploadHandler(filePath string, node pinner.PinnerNode) (cid.Cid, error) {
 	if err != nil {
 		fmt.Println("error writing data to connection: %w", err)
 	} // reset for read
+	var ccid cid.Cid
 	ccid, err = node.PinService().UploadFile(ctx, carf)
 	if err != nil {
 		log.Printf("%v", err)
 		return cid.Undef, err
 	}
+	fmt.Printf("uploaded file has root cid: %s\n", ccid)
 
 	carf.Close()
 	return ccid, nil
