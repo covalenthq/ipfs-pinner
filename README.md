@@ -22,18 +22,18 @@ ipfs-pinner can be run as a server and allows two functionalities currently - `/
 
 to start a server which listens for request on a particular port, run:
 ```bash
-go run main.go -port 3000 -jwt "<jwt_token>"
+make clean server-dbg run
 ```
 
-- submit a request to upload a file:
+- submit a request to upload a file (using multipart/form-data):
 ```bash
-➜ curl -XGET http://127.0.0.1:3000/upload\?filePath\=/Users/sudeep/repos/elixir-koans/mix.exs
+➜ curl -F "filedata=@file_to_upload" http://127.0.0.1:3000/upload
 {"cid": "QmUqcL1RwbnbQ3FzmnT1aeRk8g8L5naKinJd5hCuPXxbZ2"}
 ```
 
 - failures will be reported (via "error" field in the json). E.g:
 ```bash
-➜ curl -XGET http://127.0.0.1:3000/upload\?filePath\=not_exist_file
+➜ curl -F "filedata=@non_existent_file" http://127.0.0.1:3000/upload
 {"error": "open not_exist_file: no such file or directory"}
 ```
 
@@ -82,23 +82,16 @@ Now, we can run the container:
 
 ```bash
 docker container run --detach --name ipfs-pinner-instance \
-       --volume /tmp/data/network_artifacts/specimens:/tmp/network_artifacts/specimens \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
        -p 4001:4001 -p 3000:3000  \
-       --env WEB3_JWT=$WEB3_JWT bd08a7191c6a \
+       --env WEB3_JWT=$WEB3_JWT \
     <container-image-id>
 ```
 
 
 ### Notes on Docker Volume setup
 
-There are 2 docker volumes that need to be shared (and persisted) between the container and the host - the first is the "source" directory of network artifacts which must be available to the container (for the /upload endpoint). Note that this endpoint takes an absolute file path, and so the volume is mapped to the same path inside the container to avoid the need to do any path translations/remapping inside ipfs-pinner.  
-
-Secondly, the .ipfs directory also needs to have its lifecycle unaffected by container lifecycle (since it contains the merklelized nodes, blockstore etc.), and so that is also docker volume managed.  
-
-If there are more "source" directories, additional `--volume` flags can be passed into the docker container run command. <B>But note that to prevent the remapping issue, the paths in the host and the container need to be the same.</B>   
-In the example above `/tmp/data/network_artifacts/specimens` points to the same path in container.
-
+There's 1 docker volumes that need to be shared (and persisted) between the container and the host - the .ipfs directory needs to have its lifecycle unaffected by container lifecycle (since it contains the merklelized nodes, blockstore etc.), and so that is docker volume managed.  
 
 ### Notes on port mapping setup
 

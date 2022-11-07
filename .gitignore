@@ -4,6 +4,9 @@
 *.dll
 *.so
 *.dylib
+server/server
+binary/binary
+build/
 
 # Test binary, built with `go test -c`
 *.test
@@ -16,3 +19,4 @@
 
 .vscode/
 .DS_Store
+.envrc
