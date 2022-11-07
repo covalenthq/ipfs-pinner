@@ -22,7 +22,7 @@ ipfs-pinner can be run as a server and allows two functionalities currently - `/
 
 to start a server which listens for request on a particular port, run:
 ```bash
-go run main.go -port 3000 -jwt "<jwt_token>"
+make clean server-dbg run
 ```
 
 - submit a request to upload a file:
@@ -85,7 +85,7 @@ docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/network_artifacts/specimens:/tmp/network_artifacts/specimens \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
        -p 4001:4001 -p 3000:3000  \
-       --env WEB3_JWT=$WEB3_JWT bd08a7191c6a \
+       --env WEB3_JWT=$WEB3_JWT \
     <container-image-id>
 ```
 
