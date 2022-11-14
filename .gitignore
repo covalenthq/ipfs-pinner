@@ -20,3 +20,4 @@ build/
 .vscode/
 .DS_Store
 .envrc
+dlv/

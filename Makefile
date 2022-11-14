@@ -16,4 +16,4 @@ run:
 	$(GOBIN)/server
 
 clean:
-	rm -rf build
+	rm -rf build binary/binary server/server
