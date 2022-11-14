@@ -2,12 +2,14 @@ package dag
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
@@ -19,9 +21,10 @@ import (
 )
 
 type unixfsApi struct {
-	ipfs        coreapi.CoreExtensionAPI
-	offlineIpfs coreiface.CoreAPI
-	addOptions  []options.UnixfsAddOption
+	ipfs             coreapi.CoreExtensionAPI
+	offlineIpfs      coreiface.CoreAPI
+	addOptions       []options.UnixfsAddOption
+	peeringAvailable bool
 }
 
 var (
@@ -40,6 +43,8 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	if err != nil {
 		log.Fatalf("failed to start offline ipfs core")
 	}
+
+	api.peeringAvailable = len(ipfs.Config().Peering.Peers) > 0
 	return &api
 }
 
@@ -68,13 +73,23 @@ func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
 }
 
 func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
-	// try fetching from local first, and if not found then go for dweb.link/ipfs instead of bitswap
+	// if peering is available, try local+bitswap search with timeout
+	// if not available, try local search with timeout
+	// fallback for both cases is dweb.link fetch
 	cidStr := cid.String()
 	fmt.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
+	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
-	node, err := api.offlineIpfs.Unixfs().Get(ctx, path.New(cidStr))
-	if ipldformat.IsNotFound(err) {
-		fmt.Println("trying out dweb.link")
+	effectiveNode := api.offlineIpfs
+	if api.peeringAvailable {
+		fmt.Println("peering available...trying local+bitswap search")
+		effectiveNode = api.ipfs
+	}
+
+	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path.New(cidStr))
+	if ipldformat.IsNotFound(err) || errors.Is(err, context.DeadlineExceeded) {
+		fmt.Printf("trying out dweb.link as ipfs search failed: %s\n", err)
 		resp, err := http.Get(fmt.Sprintf("https://dweb.link/ipfs/%s", cidStr))
 		if err != nil {
 			return emptyBytes, err
@@ -82,7 +97,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 
 		return ioutil.ReadAll(resp.Body)
 	} else if err != nil {
-		fmt.Println("failed to fetch from offline")
+		fmt.Printf("failed to fetch: %s\n", err)
 		return emptyBytes, err
 	}
 

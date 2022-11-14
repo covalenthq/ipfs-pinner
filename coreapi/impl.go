@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ipfs/go-ipfs/config"
 	"github.com/ipfs/go-ipfs/core"
 	icore "github.com/ipfs/go-ipfs/core/coreapi"
 	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
@@ -12,18 +13,24 @@ import (
 
 type coreApiImpl struct {
 	coreiface.CoreAPI
-	gci *garbageCollectorImpl
+	gci    *garbageCollectorImpl
+	config *config.Config
 }
 
 func NewCoreExtensionApi(ipfsNode *core.IpfsNode) CoreExtensionAPI {
 	impl := &coreApiImpl{}
 	impl.gci = &garbageCollectorImpl{node: ipfsNode}
 	impl.CoreAPI, _ = icore.NewCoreAPI(ipfsNode)
+	impl.config, _ = ipfsNode.Repo.Config()
 	return impl
 }
 
 func (impl *coreApiImpl) GC() GarbageCollectAPI {
 	return impl.gci
+}
+
+func (impl *coreApiImpl) Config() *config.Config {
+	return impl.config
 }
 
 type garbageCollectorImpl struct {
