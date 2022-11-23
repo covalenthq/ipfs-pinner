@@ -77,19 +77,19 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 	// if not available, try local search with timeout
 	// fallback for both cases is dweb.link fetch
 	cidStr := cid.String()
-	fmt.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
+	log.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
 	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	effectiveNode := api.offlineIpfs
 	if api.peeringAvailable {
-		fmt.Println("peering available...trying local+bitswap search")
+		log.Println("peering available...trying local+bitswap search")
 		effectiveNode = api.ipfs
 	}
 
 	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path.New(cidStr))
 	if ipldformat.IsNotFound(err) || errors.Is(err, context.DeadlineExceeded) {
-		fmt.Printf("trying out dweb.link as ipfs search failed: %s\n", err)
+		log.Printf("trying out dweb.link as ipfs search failed: %s\n", err)
 		resp, err := http.Get(fmt.Sprintf("https://dweb.link/ipfs/%s", cidStr))
 		if err != nil {
 			return emptyBytes, err
@@ -97,7 +97,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 
 		return ioutil.ReadAll(resp.Body)
 	} else if err != nil {
-		fmt.Printf("failed to fetch: %s\n", err)
+		log.Printf("failed to fetch: %s\n", err)
 		return emptyBytes, err
 	}
 
@@ -144,19 +144,19 @@ func (api *unixfsApi) recurse(dir files.Node) {
 	case files.File:
 		size, err := val.Size()
 		if err != nil {
-			fmt.Println("found error")
+			log.Println("found error")
 		}
-		fmt.Printf("file found finally (%d)\n", size)
+		log.Printf("file found finally (%d)\n", size)
 	case files.Directory:
 		it := val.Entries()
 		for it.Next() {
 			name := it.Name()
-			fmt.Println("name: ", name)
+			log.Println("name: ", name)
 			api.recurse(it.Node())
 		}
 
 		err := it.Err()
-		fmt.Printf("some error:%s\n", err)
+		log.Printf("some error:%s\n", err)
 	default:
 		log.Fatalf("oh no %s not found", val)
 	}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/ipfs/go-cid"
@@ -51,7 +52,7 @@ func (exp *carExporter) MultiExport(ctx context.Context, contentRoot cid.Cid, wr
 	for _, writer := range writers {
 		err := preparedScar.Dump(ctx, writer)
 		if err != nil {
-			fmt.Println("error writing car file: %w", err)
+			log.Println("error writing car file: %w", err)
 		}
 	}
 

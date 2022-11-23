@@ -58,7 +58,7 @@ func setUpAndRunServer(portNumber int, token string) {
 	log.Print("Listening...")
 	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
 	if err != nil {
-		fmt.Println("error listening and serving on TCP network: %w", err)
+		log.Println("error listening and serving on TCP network: %w", err)
 	}
 }
 
@@ -67,7 +67,7 @@ func respondError(w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	_, err = w.Write([]byte(err_str))
 	if err != nil {
-		fmt.Println("error writing data to connection: %w", err)
+		log.Println("error writing data to connection: %w", err)
 	}
 }
 
@@ -104,7 +104,7 @@ func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 			succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
 			_, err := w.Write([]byte(succ_str))
 			if err != nil {
-				fmt.Println("error writing data to connection: %w", err)
+				log.Println("error writing data to connection: %w", err)
 			}
 		}
 	}
@@ -120,11 +120,11 @@ func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
 			} else {
 				_, err := w.Write(contents)
 				if err != nil {
-					fmt.Println("error writing data to connection: %w", err)
+					log.Println("error writing data to connection: %w", err)
 				}
 			}
 		} else {
-			fmt.Println("Please provide a cid for fetching!")
+			log.Println("Please provide a cid for fetching!")
 		}
 	}
 
@@ -162,7 +162,7 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 		return cid.Undef, err
 	}
 
-	fmt.Printf("generated dag has root cid: %s\n", fcid)
+	log.Printf("generated dag has root cid: %s\n", fcid)
 
 	carf, err := os.CreateTemp(os.TempDir(), "*.car")
 	if err != nil {
@@ -189,7 +189,7 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 
 	_, err = carf.Seek(0, 0)
 	if err != nil {
-		fmt.Println("error writing data to connection: %w", err)
+		log.Println("error writing data to connection: %w", err)
 	} // reset for read
 	var ccid cid.Cid
 	ccid, err = node.PinService().UploadFile(ctx, carf)
@@ -197,7 +197,7 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 		log.Printf("%v", err)
 		return cid.Undef, err
 	}
-	fmt.Printf("uploaded file has root cid: %s\n", ccid)
+	log.Printf("uploaded file has root cid: %s\n", ccid)
 
 	carf.Close()
 	return ccid, nil

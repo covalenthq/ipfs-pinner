@@ -2,7 +2,7 @@ package coreapi
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/ipfs/go-ipfs/config"
 	"github.com/ipfs/go-ipfs/core"
@@ -40,6 +40,6 @@ type garbageCollectorImpl struct {
 func (gci *garbageCollectorImpl) GarbageCollect(ctx context.Context) {
 	err := corerepo.GarbageCollect(gci.node, ctx)
 	if err != nil {
-		fmt.Println("error getting garbage collector: %w", err)
+		log.Println("error getting garbage collector: %w", err)
 	}
 }
