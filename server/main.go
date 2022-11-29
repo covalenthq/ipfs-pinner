@@ -54,6 +54,7 @@ func setUpAndRunServer(portNumber int, token string) {
 
 	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))
 	mux.Handle("/get", recoveryWrapper(downloadHttpHandler(node)))
+	mux.Handle("/cid", recoveryWrapper(cidHttpHandler(node)))
 
 	log.Print("Listening...")
 	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
@@ -73,29 +74,11 @@ func respondError(w http.ResponseWriter, err error) {
 
 func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		mreader, err := r.MultipartReader()
+		contents, err := readContentFromRequest(r)
 		if err != nil {
 			respondError(w, err)
 			return
 		}
-
-		var contents string = ""
-
-		for {
-			part, err := mreader.NextPart()
-			if err == io.EOF {
-				break
-			}
-
-			pcontents, err := ioutil.ReadAll(part)
-			if err != nil {
-				respondError(w, err)
-				return
-			}
-
-			contents += string(pcontents)
-		}
-
 		ccid, err := uploadHandler(contents, node)
 		if err != nil {
 			respondError(w, err)
@@ -131,6 +114,56 @@ func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
+func cidHttpHandler(node pinner.PinnerNode) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		log.Println("not reached here")
+		contents, err := readContentFromRequest(r)
+		if err != nil {
+			respondError(w, err)
+			return
+		}
+
+		ccid, err := cidHandler(contents, node)
+		if err != nil {
+			respondError(w, err)
+			return
+		} else {
+			succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
+			_, err := w.Write([]byte(succ_str))
+			if err != nil {
+				log.Println("error writing data to connection: %w", err)
+			}
+		}
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+func readContentFromRequest(r *http.Request) (string, error) {
+	mreader, err := r.MultipartReader()
+	if err != nil {
+		return "", err
+	}
+
+	var contents string = ""
+
+	for {
+		part, err := mreader.NextPart()
+		if err == io.EOF {
+			break
+		}
+
+		pcontents, err := ioutil.ReadAll(part)
+		if err != nil {
+			return "", err
+		}
+
+		contents += string(pcontents)
+	}
+
+	return contents, nil
+}
+
 func recoveryWrapper(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -150,6 +183,20 @@ func recoveryWrapper(h http.Handler) http.Handler {
 		}()
 		h.ServeHTTP(w, r)
 	})
+}
+
+func cidHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), UPLOAD_TIMEOUT)
+	defer cancel()
+
+	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader([]byte(contents)))
+	if err != nil {
+		log.Printf("%v", err)
+		return cid.Undef, err
+	}
+
+	log.Printf("cidHandler: generated dag has root cid: %s\n", fcid)
+	return fcid, nil
 }
 
 func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {

@@ -25,6 +25,8 @@ to start a server which listens for request on a particular port, run:
 make clean server-dbg run
 ```
 
+
+### upload a file
 - submit a request to upload a file (using multipart/form-data):
 ```bash
 ➜ curl -F "filedata=@file_to_upload" http://127.0.0.1:3000/upload
@@ -42,6 +44,8 @@ there's a timeout (check code for value), on timeout the error message returned 
 {"error": "context deadline exceeded"}
 ```
 
+
+### download content (given cid)
 - download a file
 if the request succeeds the raw content is sent back and it can be outputted in a file using curl. e.g.
 ```bash
@@ -58,8 +62,11 @@ There's a timeout (check code for value) for the download request, if it doesn't
 {"error": "context deadline exceeded"}
 ```
 
-
-
+### find the cid given some content
+```bash
+➜ curl -F "filedata=@LICENSE" http://127.0.0.1:3000/cid
+{"cid": "bafkreicszve3ewhhrgobm366mdctki2m2qwzide5e54zh5aifnesg3ofne"}%
+```
 
 ## running ipfs-pinner server on docker
 
