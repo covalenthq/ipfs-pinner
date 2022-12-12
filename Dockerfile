@@ -3,7 +3,7 @@ FROM golang:1.17-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
-RUN go mod download && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
+RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
 # Runtime -  second phase.
 FROM alpine:3.15.0
