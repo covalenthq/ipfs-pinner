@@ -82,7 +82,7 @@ docker run command should have:
 
 
 ```bash
-docker image build --tag ipfs-pinner:latest  .
+docker buildx create --name builder --use --platform=linux/amd64,linux/arm64  && docker buildx build --platform=linux/amd64,linux/arm64 . -t gcr.io/covalent-project/ipfs-pinner:latest
 ```
 
 Now, we can run the container:
@@ -92,7 +92,7 @@ docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
        -p 4001:4001 -p 3000:3000  \
        --env WEB3_JWT=$WEB3_JWT \
-    <container-image-id>
+    <image-id>
 ```
 
 
