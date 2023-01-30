@@ -116,7 +116,6 @@ func downloadHttpHandler(node pinner.PinnerNode) http.Handler {
 
 func cidHttpHandler(node pinner.PinnerNode) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Println("not reached here")
 		contents, err := readContentFromRequest(r)
 		if err != nil {
 			respondError(w, err)
