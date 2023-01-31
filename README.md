@@ -18,13 +18,15 @@ To avoid this issue, the merkle DAG thus generated is exported into special file
 
 ## Usage as a server
 
-ipfs-pinner can be run as a server and allows two functionalities currently - `/get` and `/upload`
+1. Set the environment variable `WEB3_JWT`
 
-to start a server which listens for request on a particular port, run:
+2. to start a server which listens for request on 3000 port, run:
 ```bash
 make clean server-dbg run
 ```
 
+
+ipfs-pinner can be run as a server and allows two functionalities currently - `/get` and `/upload`
 
 ### upload a file
 - submit a request to upload a file (using multipart/form-data):
