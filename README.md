@@ -43,6 +43,46 @@ Or above fails with a message about permission issues to access  ~/.ipfs/*, run 
 sudo chmod -R 700 ~/.ipfs  
 ```
 
+### netscan alert issue
+
+If while using ipfs-pinner, a netscan alert is triggered due the exposed usage of port 4001 (swarm port for p2p) while ipfs tries to look for ipfs nodes in an internal network, this can be avoided by running ipfs as a server by updating the config in the following steps.
+
+
+  1. Shut down the nodes using ipfs.
+  2. Apply the config.
+  3. Restart the nodes.
+
+```bash
+sudo systemctl stop bsp-agent.service
+sudo systemctl stop ipfs-pinner.service
+ipfs config profile apply server
+
+{
+"API": {"HTTPHeaders":{}},
+"Addresses": {
+    "API": "/ip4/127.0.0.1/tcp/5001",
+    "Announce": [],
+    "AppendAnnounce": [],
+    "Gateway": "/ip4/127.0.0.1/tcp/8080",
+    "NoAnnounce": {
+        << "": "/ip4/10.0.0.0/ipcidr/8",
+..
+...
+....
+.....
+    <> "DisableNatPortMap": false,
+    ** "DisableNatPortMap": true,
+    "RelayClient": {},
+    "RelayService": {},
+    "ResourceMgr": {},
+    "Transports": {"Multiplexers":{},"Network":{},"Security":{}}
+    }
+sudo systemctl start ipfs-pinner.service
+sudo systemctl start bsp-agent.service
+```
+
+This effectively disables local host discovery and is recommended when running IPFS on machines with public IPv4 addresses.
+
 ### upload a file
 
 - submit a request to upload a file (using multipart/form-data):
