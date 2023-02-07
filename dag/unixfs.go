@@ -95,6 +95,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 			return emptyBytes, err
 		}
 
+		defer resp.Body.Close()
 		return ioutil.ReadAll(resp.Body)
 	} else if err != nil {
 		log.Printf("failed to fetch: %s\n", err)
