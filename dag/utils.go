@@ -43,7 +43,7 @@ func (fetcher *httpContentFetcher) FetchCidViaHttp(ctx context.Context, cid stri
 func (fetcher *httpContentFetcher) tryFetch(ctx context.Context, cid string, url string) ([]byte, error) {
 	url = fmt.Sprintf(url, cid)
 	log.Printf("trying out %s", url)
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
 	defer cancel()
 
 	resp, err := fetcher.Get(timeoutCtx, url)
