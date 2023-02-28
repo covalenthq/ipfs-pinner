@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	IPFS_HTTP_GATEWAYS = []string{"https://dweb.link/ipfs/%s", "https://ipfs.io/ipfs/%s", "https://w3s.link/ipfs/%s"}
+	IPFS_HTTP_GATEWAYS = []string{"https://w3s.link/ipfs/%s", "https://dweb.link/ipfs/%s", "https://ipfs.io/ipfs/%s"}
 )
 
 type httpContentFetcher struct {
