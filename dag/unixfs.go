@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"reflect"
 	"time"
 
@@ -21,10 +20,11 @@ import (
 )
 
 type unixfsApi struct {
-	ipfs             coreapi.CoreExtensionAPI
-	offlineIpfs      coreiface.CoreAPI
-	addOptions       []options.UnixfsAddOption
-	peeringAvailable bool
+	ipfs               coreapi.CoreExtensionAPI
+	offlineIpfs        coreiface.CoreAPI
+	addOptions         []options.UnixfsAddOption
+	httpContentFetcher *httpContentFetcher
+	peeringAvailable   bool
 }
 
 var (
@@ -45,6 +45,7 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	}
 
 	api.peeringAvailable = len(ipfs.Config().Peering.Peers) > 0
+	api.httpContentFetcher = NewHttpContentFetcher()
 	return &api
 }
 
@@ -75,7 +76,7 @@ func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
 func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 	// if peering is available, try local+bitswap search with timeout
 	// if not available, try local search with timeout
-	// fallback for both cases is dweb.link fetch
+	// fallback for both cases is http gateway fetch
 	cidStr := cid.String()
 	log.Printf("unixfsApi.Get: getting the cid: %s\n", cidStr)
 	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -89,16 +90,19 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 
 	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path.New(cidStr))
 	if ipldformat.IsNotFound(err) || errors.Is(err, context.DeadlineExceeded) {
-		log.Printf("trying out dweb.link as ipfs search failed: %s\n", err)
-		resp, err := http.Get(fmt.Sprintf("https://dweb.link/ipfs/%s", cidStr))
+		if api.peeringAvailable {
+			log.Printf("trying out http search as ipfs p2p failed: %s\n", err)
+		}
+
+		content, err := api.httpContentFetcher.FetchCidViaHttp(ctx, cidStr)
 		if err != nil {
+			log.Printf("error fetching: %s", err)
 			return emptyBytes, err
 		}
 
-		defer resp.Body.Close()
-		return ioutil.ReadAll(resp.Body)
+		return content, nil
 	} else if err != nil {
-		log.Printf("failed to fetch: %s\n", err)
+		log.Printf("failed to fetch via ipfs p2p: %s\n", err)
 		return emptyBytes, err
 	}
 
