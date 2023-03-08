@@ -12,7 +12,7 @@ require (
 	github.com/ipfs/interface-go-ipfs-core v0.7.0
 	github.com/ipld/go-car v0.4.0
 	github.com/ipld/go-ipld-prime v0.20.0
-	github.com/multiformats/go-multiaddr v0.5.0
+	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/multiformats/go-multibase v0.0.3
 	github.com/pkg/errors v0.9.1
 	github.com/ybbus/httpretry v1.0.2
