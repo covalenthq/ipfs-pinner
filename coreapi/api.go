@@ -3,8 +3,8 @@ package coreapi
 import (
 	"context"
 
-	"github.com/ipfs/go-ipfs/config"
 	coreiface "github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/kubo/config"
 )
 
 type CoreExtensionAPI interface {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/ipfs/go-ipfs/config"
-	"github.com/ipfs/go-ipfs/core"
-	icore "github.com/ipfs/go-ipfs/core/coreapi"
-	corerepo "github.com/ipfs/go-ipfs/core/corerepo"
 	coreiface "github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/kubo/config"
+	"github.com/ipfs/kubo/core"
+	icore "github.com/ipfs/kubo/core/coreapi"
+	corerepo "github.com/ipfs/kubo/core/corerepo"
 )
 
 type coreApiImpl struct {
