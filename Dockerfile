@@ -1,5 +1,5 @@
 # Build - first phase
-FROM golang:1.17-alpine as builder
+FROM golang:1.18-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
@@ -16,6 +16,7 @@ RUN chmod +x ./ipfs-server
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 CMD [ "./ipfs-server -port 3000 -jwt $WEB3_JWT" ]
 
+# ipfs-pinner API server;
 EXPOSE 3000
 # Swarm TCP; should be exposed to the public
 EXPOSE 4001
