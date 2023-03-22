@@ -6,7 +6,7 @@ COPY . .
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
 # Runtime -  second phase.
-FROM alpine:3.15.0
+FROM alpine:3.15.7
 RUN mkdir /app
 WORKDIR /app
 RUN apk update && apk add --no-cache bash=5.1.16-r0
