@@ -31,7 +31,7 @@ var (
 	emptyBytes = []byte("")
 )
 
-func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOnly bool) UnixfsAPI {
+func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOnly bool, ipfsFetchUrls []string) UnixfsAPI {
 	api := unixfsApi{}
 	api.addOptions = append(api.addOptions, options.Unixfs.CidVersion(cidVersion))
 	api.addOptions = append(api.addOptions, options.Unixfs.HashOnly(cidGenerationOnly))
@@ -45,7 +45,7 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	}
 
 	api.peeringAvailable = len(ipfs.Config().Peering.Peers) > 0
-	api.httpContentFetcher = NewHttpContentFetcher()
+	api.httpContentFetcher = NewHttpContentFetcher(ipfsFetchUrls)
 	return &api
 }
 
@@ -99,6 +99,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 			log.Printf("error fetching: %s", err)
 			return emptyBytes, err
 		}
+		log.Println("got the content!")
 
 		return content, nil
 	} else if err != nil {
@@ -142,8 +143,9 @@ func (api *unixfsApi) readFirstFile(dir files.Directory) ([]byte, error) {
 	return emptyBytes, fmt.Errorf("node %s entries is empty: %v", dir.Entries().Name(), it.Err())
 }
 
-//lint:ignore U1000 function which traverses through the node and prints debug info.
 // Meant for debugging purposes, do not use in prod
+//
+//lint:ignore U1000 function which traverses through the node and prints debug info.
 func (api *unixfsApi) recurse(dir files.Node) {
 	switch val := dir.(type) {
 	case files.File:

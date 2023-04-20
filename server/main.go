@@ -10,8 +10,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -32,12 +34,13 @@ var (
 func main() {
 	portNumber := flag.Int("port", 3000, "port number for the server")
 	token := flag.String("jwt", "", "JWT token for web3.storage")
+	ipfsGatewayUrls := flag.String("ipfs-gateway-urls", "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s", "comma separated list of ipfs gateway urls")
 
 	flag.Parse()
-	setUpAndRunServer(*portNumber, *token)
+	setUpAndRunServer(*portNumber, *token, *ipfsGatewayUrls)
 }
 
-func setUpAndRunServer(portNumber int, token string) {
+func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
 	mux := http.NewServeMux()
 	if token == "" {
 		var present bool
@@ -47,9 +50,25 @@ func setUpAndRunServer(portNumber int, token string) {
 		}
 	}
 
+	var ipfsGatewayUrlArr []string
+	if ipfsGatewayUrls != "" {
+		ipfsGatewayUrlArr = strings.Split(ipfsGatewayUrls, ",")
+		for _, ipfsUrlStr := range ipfsGatewayUrlArr {
+			if !strings.Contains(ipfsUrlStr, "%s") {
+				log.Fatalf("ipfs gateway url %s does not contain %%s", ipfsUrlStr)
+			}
+
+			if _, err := url.Parse(fmt.Sprintf(ipfsUrlStr, "sample_cid")); err != nil {
+				log.Fatalf("ipfs gateway url %s is not a valid url", ipfsUrlStr)
+			}
+		}
+	} else {
+		log.Fatalf("ipfs gateway urls not found in params")
+	}
+
 	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(1).CidComputeOnly(false)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, ipfsGatewayUrlArr).CidVersion(1).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)
 
 	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))

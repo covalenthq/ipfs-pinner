@@ -14,25 +14,26 @@ var (
 )
 
 type httpContentFetcher struct {
-	cursor int
+	cursor        int
+	ipfsFetchUrls []string
 }
 
-func NewHttpContentFetcher() *httpContentFetcher {
-	return &httpContentFetcher{cursor: 0}
+func NewHttpContentFetcher(ipfsFetchUrls []string) *httpContentFetcher {
+	return &httpContentFetcher{cursor: 0, ipfsFetchUrls: ipfsFetchUrls}
 }
 
 func (fetcher *httpContentFetcher) FetchCidViaHttp(ctx context.Context, cid string) ([]byte, error) {
 	previous := fetcher.cursor
 
 	for {
-		content, err := fetcher.tryFetch(ctx, cid, IPFS_HTTP_GATEWAYS[fetcher.cursor])
+		content, err := fetcher.tryFetch(ctx, cid, fetcher.ipfsFetchUrls[fetcher.cursor])
 		if err != nil {
 			log.Printf("%s", err)
 		} else {
 			return content, nil
 		}
 
-		fetcher.cursor = (fetcher.cursor + 1) % len(IPFS_HTTP_GATEWAYS)
+		fetcher.cursor = (fetcher.cursor + 1) % len(fetcher.ipfsFetchUrls)
 		log.Printf("value of cursor: %d", fetcher.cursor)
 		if fetcher.cursor == previous {
 			return emptyBytes, fmt.Errorf("exhausted listed gateways, but content not found")
@@ -43,7 +44,7 @@ func (fetcher *httpContentFetcher) FetchCidViaHttp(ctx context.Context, cid stri
 func (fetcher *httpContentFetcher) tryFetch(ctx context.Context, cid string, url string) ([]byte, error) {
 	url = fmt.Sprintf(url, cid)
 	log.Printf("trying out %s", url)
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	resp, err := fetcher.Get(timeoutCtx, url)
