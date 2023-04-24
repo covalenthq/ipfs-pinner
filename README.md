@@ -1,9 +1,29 @@
 # ipfs-pinner
 
-- a wrapper on top of ipfs node, utilising go-ipfs as a library.
-- extended support for custom file upload endpoints provided by pinata & web3.storage
-- content archive file generation and lightweight deterministic CID generation on client side (using CARs).
-- it can be used as a go library (see `binary/main.go` for usage) or as a http server
+- [ipfs-pinner](#ipfs-pinner)
+  - [Introduction](#introduction)
+  - [Usage as a library](#usage-as-a-library)
+    - [A note on CID and CAR files](#a-note-on-cid-and-car-files)
+  - [running ipfs-pinner server](#running-ipfs-pinner-server)
+    - [upload a file](#upload-a-file)
+    - [download content (given cid)](#download-content-given-cid)
+    - [find the cid given some content](#find-the-cid-given-some-content)
+  - [running ipfs-pinner server on docker](#running-ipfs-pinner-server-on-docker)
+    - [Docker Volume setup](#docker-volume-setup)
+    - [Port mapping setup](#port-mapping-setup)
+  - [Development](#development)
+    - [generate go http client go bindings via openapi](#generate-go-http-client-go-bindings-via-openapi)
+  - [Known Issues](#known-issues)
+    - [permission issue](#permission-issue)
+    - [netscan alert issue](#netscan-alert-issue)
+    - [updating IPFS http gateways](#updating-ipfs-http-gateways)
+
+## Introduction
+
+-- a wrapper on top of ipfs node, utilising go-ipfs as a library.
+-- extended support for custom file upload endpoints provided by pinata & web3.storage
+-- content archive file generation and lightweight deterministic CID generation on client side (using CARs).
+-- it can be used as a go library (see `binary/main.go` for usage) or as a http server
 
 ## Usage as a library
 
@@ -16,7 +36,7 @@ When you do a `ipfs add`, the content of the files are chunked and a merkle DAG 
 To avoid this issue, the merkle DAG thus generated is exported into special files called content archives, and uploading these CAR files. Thus, the merkle DAG structure is encapsulated in the files uploaded, and the same CID can now be used no matter what the pinning service is.
 
 
-## Usage as a server
+## running ipfs-pinner server
 
 1. Set the environment variable `WEB3_JWT`
 
@@ -26,62 +46,14 @@ To avoid this issue, the merkle DAG thus generated is exported into special file
 make clean server-dbg run
 ```
 
+NOTE: If you want more control over CLI params, you can run the server binary (after `make clean server-dbg`):
+```bash
+./build/bin/server -jwt <WEB3_JWT> -port 3000
+```
+
+NOTE: If you get some error when running this, check if the diagnostic is there in [known issues](#known-issues)
+
 ipfs-pinner can be run as a server and allows two functionalities currently - `/get` and `/upload`
-
-### permission issue
-
-If while using the ipfs-pinner as a server, you come across any permissions issues with logs such as 
-
-```log
-Permission denied: Unable to access ./ipfs/plugins ...
-etc
-```
-
-Or above fails with a message about permission issues to access  ~/.ipfs/*, run the following against the ipfs directory and try again.
-
-```bash
-sudo chmod -R 700 ~/.ipfs  
-```
-
-### netscan alert issue
-
-If while using ipfs-pinner, a netscan alert is triggered due the exposed usage of port 4001 (swarm port for p2p) while ipfs tries to look for ipfs nodes in an internal network, this can be avoided by running ipfs as a server by updating the config in the following steps.
-
-
-  1. Shut down the nodes using ipfs.
-  2. Apply the config.
-  3. Restart the nodes.
-
-```bash
-sudo systemctl stop bsp-agent.service
-sudo systemctl stop ipfs-pinner.service
-ipfs config profile apply server
-
-{
-"API": {"HTTPHeaders":{}},
-"Addresses": {
-    "API": "/ip4/127.0.0.1/tcp/5001",
-    "Announce": [],
-    "AppendAnnounce": [],
-    "Gateway": "/ip4/127.0.0.1/tcp/8080",
-    "NoAnnounce": {
-        << "": "/ip4/10.0.0.0/ipcidr/8",
-..
-...
-....
-.....
-    <> "DisableNatPortMap": false,
-    ** "DisableNatPortMap": true,
-    "RelayClient": {},
-    "RelayService": {},
-    "ResourceMgr": {},
-    "Transports": {"Multiplexers":{},"Network":{},"Security":{}}
-    }
-sudo systemctl start ipfs-pinner.service
-sudo systemctl start bsp-agent.service
-```
-
-This effectively disables local host discovery and is recommended when running IPFS on machines with public IPv4 addresses.
 
 ### upload a file
 
@@ -162,11 +134,11 @@ docker container run --detach --name ipfs-pinner-instance \
     <image-id>
 ```
 
-### Notes on Docker Volume setup
+### Docker Volume setup
 
 There's 1 docker volumes that need to be shared (and persisted) between the container and the host - the .ipfs directory needs to have its lifecycle unaffected by container lifecycle (since it contains the merklelized nodes, blockstore etc.), and so that is docker volume managed.  
 
-### Notes on port mapping setup
+### Port mapping setup
 
 :4001 : swarm port for p2p  
 :8080 - http gateway (used by encapsulated ipfs-node)
@@ -184,3 +156,71 @@ There's 1 docker volumes that need to be shared (and persisted) between the cont
 - use `./generate_gobindings.sh` to generate the golang bindings (for pinning services of pinata and web3.storage).
 
 - There are some fixes you would need to do (missing braces etc).
+
+
+## Known Issues
+
+### permission issue
+
+If while using the ipfs-pinner as a server, you come across any permissions issues with logs such as
+
+```log
+Permission denied: Unable to access ./ipfs/plugins ...
+etc
+```
+
+Or above fails with a message about permission issues to access  ~/.ipfs/*, run the following against the ipfs directory and try again.
+
+```bash
+sudo chmod -R 700 ~/.ipfs
+```
+
+### netscan alert issue
+
+If while using ipfs-pinner, a netscan alert is triggered due the exposed usage of port 4001 (swarm port for p2p) while ipfs tries to look for ipfs nodes in an internal network, this can be avoided by running ipfs as a server by updating the config in the following steps.
+
+
+  1. Shut down the nodes using ipfs.
+  2. Apply the config.
+  3. Restart the nodes.
+
+```bash
+sudo systemctl stop bsp-agent.service
+sudo systemctl stop ipfs-pinner.service
+ipfs config profile apply server
+
+{
+"API": {"HTTPHeaders":{}},
+"Addresses": {
+    "API": "/ip4/127.0.0.1/tcp/5001",
+    "Announce": [],
+    "AppendAnnounce": [],
+    "Gateway": "/ip4/127.0.0.1/tcp/8080",
+    "NoAnnounce": {
+        << "": "/ip4/10.0.0.0/ipcidr/8",
+..
+...
+....
+.....
+    <> "DisableNatPortMap": false,
+    ** "DisableNatPortMap": true,
+    "RelayClient": {},
+    "RelayService": {},
+    "ResourceMgr": {},
+    "Transports": {"Multiplexers":{},"Network":{},"Security":{}}
+    }
+sudo systemctl start ipfs-pinner.service
+sudo systemctl start bsp-agent.service
+```
+
+This effectively disables local host discovery and is recommended when running IPFS on machines with public IPv4 addresses.
+
+
+### updating IPFS http gateways
+ipfs-pinner currently uses some known IPFS gateways to fetch content. These gateways are expected to be run and maintained for a long time, but if you need to update the gateways list due to one of the going down, or a more efficient gateway being introduced etc. you can change the list:
+
+```
+./build/bin/server -jwt <WEB3_JWT> -port 3000 -ipfs-gateway-urls "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s"
+```
+
+The `-ipfs-gateways-urls` is a comma separated list of http urls with a `%s` presentn in it, which is formatted to replace the IPFS content identifier (CID) in it.
