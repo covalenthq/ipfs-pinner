@@ -25,7 +25,7 @@ func main() {
 
 	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq).CidVersion(1).CidComputeOnly(false)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, []string{"https://w3s.link/ipfs/%s"}).CidVersion(1).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)
 	ctx := context.Background()
 	//upload(ctx, node)
