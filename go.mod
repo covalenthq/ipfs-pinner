@@ -3,7 +3,7 @@ module github.com/covalenthq/ipfs-pinner
 go 1.17
 
 require (
-	github.com/ipfs/go-block-format v0.0.3
+	github.com/ipfs/go-block-format v0.1.2
 	github.com/ipfs/go-cid v0.3.2
 	github.com/ipfs/go-ipfs-files v0.1.1
 	github.com/ipfs/go-ipld-format v0.4.0
@@ -13,7 +13,7 @@ require (
 	github.com/ipld/go-car v0.4.0
 	github.com/ipld/go-ipld-prime v0.20.0
 	github.com/multiformats/go-multiaddr v0.8.0
-	github.com/multiformats/go-multibase v0.1.1
+	github.com/multiformats/go-multibase v0.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/ybbus/httpretry v1.0.2
 	golang.org/x/oauth2 v0.6.0

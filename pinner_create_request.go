@@ -8,13 +8,15 @@ type PinnerNodeCreateRequest struct {
 	pinServiceRequest pinclient.ClientCreateRequest
 	cidComputeOnly    bool
 	cidVersion        int
+	ipfsFetchUrls     []string
 }
 
-func NewNodeRequest(clientRequest pinclient.ClientCreateRequest) *PinnerNodeCreateRequest {
+func NewNodeRequest(clientRequest pinclient.ClientCreateRequest, ipfsFetchUrls []string) *PinnerNodeCreateRequest {
 	request := new(PinnerNodeCreateRequest)
 	request.cidVersion = 0
 	request.cidComputeOnly = true
 	request.pinServiceRequest = clientRequest
+	request.ipfsFetchUrls = ipfsFetchUrls
 	return request
 }
 

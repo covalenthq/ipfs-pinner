@@ -33,7 +33,7 @@ func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
 
 	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest, req.cidVersion)
 	node.carExporter = car.NewCarExporter(node.ipfsCore)
-	node.unixfsService = dag.NewUnixfsAPI(node.ipfsCore, req.cidVersion, req.cidComputeOnly)
+	node.unixfsService = dag.NewUnixfsAPI(node.ipfsCore, req.cidVersion, req.cidComputeOnly, req.ipfsFetchUrls)
 
 	return &node
 }
