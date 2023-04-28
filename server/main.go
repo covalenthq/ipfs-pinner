@@ -37,6 +37,7 @@ func main() {
 	ipfsGatewayUrls := flag.String("ipfs-gateway-urls", "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s", "comma separated list of ipfs gateway urls")
 
 	flag.Parse()
+	core.Version()
 	setUpAndRunServer(*portNumber, *token, *ipfsGatewayUrls)
 }
 
