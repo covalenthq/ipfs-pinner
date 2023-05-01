@@ -29,6 +29,7 @@ func main() {
 	node := pinner.NewPinnerNode(*nodeCreateReq)
 	ctx := context.Background()
 	//upload(ctx, node)
+	core.Version()
 	download(ctx, node)
 }
 
