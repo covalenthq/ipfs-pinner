@@ -303,7 +303,7 @@ func downloadHandler(cidStr string, node pinner.PinnerNode) ([]byte, error) {
 func healthHttpHandler(s *State) http.Handler {
 	// Check the health of the server and return a status code accordingly
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Panicln("Received /health request:", "source=", r.RemoteAddr, "status=", s.status)
+		log.Println("Received /health request:", "source=", r.RemoteAddr, "status=", s.status)
 		switch s.status {
 		case OK:
 			io.WriteString(w, "I'm healthy")
