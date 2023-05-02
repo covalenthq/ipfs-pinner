@@ -306,7 +306,10 @@ func healthHttpHandler(s *State) http.Handler {
 		log.Println("Received /health request:", "source=", r.RemoteAddr, "status=", s.status)
 		switch s.status {
 		case OK:
-			io.WriteString(w, "I'm healthy")
+			_, err := io.WriteString(w, "I'm healthy")
+			if err != nil {
+				log.Println("cannot write %w string", err)
+			}
 			return
 		case BAD:
 			http.Error(w, "Internal Error", 500)
@@ -315,7 +318,10 @@ func healthHttpHandler(s *State) http.Handler {
 			time.Sleep(30 * time.Second)
 			return
 		default:
-			io.WriteString(w, "UNKNOWN")
+			_, err := io.WriteString(w, "UNKNOWN")
+			if err != nil {
+				log.Println("cannot write %w string", err)
+			}
 			return
 		}
 	}
@@ -325,7 +331,10 @@ func healthHttpHandler(s *State) http.Handler {
 func sabotageHttpHandler(s *State) http.Handler {
 	fn := func(w http.ResponseWriter, _ *http.Request) {
 		s.status = BAD
-		io.WriteString(w, "Sabotage ON")
+		_, err := io.WriteString(w, "Sabotage ON")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
 	}
 	return http.HandlerFunc(fn)
 }
@@ -333,7 +342,10 @@ func sabotageHttpHandler(s *State) http.Handler {
 func recoverHttpHandler(s *State) http.Handler {
 	fn := func(w http.ResponseWriter, _ *http.Request) {
 		s.status = OK
-		io.WriteString(w, "Recovered.")
+		_, err := io.WriteString(w, "Recovered.")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
 	}
 	return http.HandlerFunc(fn)
 }
@@ -341,7 +353,10 @@ func recoverHttpHandler(s *State) http.Handler {
 func timeoutHttpHandler(s *State) http.Handler {
 	fn := func(w http.ResponseWriter, _ *http.Request) {
 		s.status = TIMEOUT
-		io.WriteString(w, "Configured to timeout.")
+		_, err := io.WriteString(w, "Configured to timeout.")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
 	}
 	return http.HandlerFunc(fn)
 }
