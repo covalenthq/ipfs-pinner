@@ -13,6 +13,9 @@ RUN apk update && apk add --no-cache bash=5.1.16-r0
 COPY --from=builder /build/ipfs-server /app
 SHELL ["/bin/bash", "-c"]
 RUN chmod +x ./ipfs-server
+
+HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3000/health
+
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 CMD [ "./ipfs-server -port 3000 -jwt $WEB3_JWT" ]
 
@@ -26,5 +29,3 @@ EXPOSE 5001
 EXPOSE 8080
 # Swarm Websockets; must be exposed publicly when the node is listening using the websocket transport (/ipX/.../tcp/8081/ws).
 EXPOSE 8081
-
-HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3000/health || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
