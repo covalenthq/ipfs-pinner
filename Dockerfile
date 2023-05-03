@@ -13,6 +13,9 @@ RUN apk update && apk add --no-cache bash=5.1.16-r0
 COPY --from=builder /build/ipfs-server /app
 SHELL ["/bin/bash", "-c"]
 RUN chmod +x ./ipfs-server
+
+HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3000/health
+
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 CMD [ "./ipfs-server -port 3000 -jwt $WEB3_JWT" ]
 

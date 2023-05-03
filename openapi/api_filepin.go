@@ -58,8 +58,8 @@ PinataFileUpload Upload file to IPFS
 
 pinata services' upload file to ipfs option
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiPinataFileUploadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPinataFileUploadRequest
 */
 func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileUploadRequest {
 	return ApiPinataFileUploadRequest{
@@ -69,7 +69,8 @@ func (a *FilepinApiService) PinataFileUpload(ctx context.Context) ApiPinataFileU
 }
 
 // Execute executes the request
-//  @return PinataResponse
+//
+//	@return PinataResponse
 func (a *FilepinApiService) PinataFileUploadExecute(r ApiPinataFileUploadRequest) (*PinataResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -253,8 +254,8 @@ Web3StorageCarUpload Upload car file to web3.storage
 
 Upload car file to web3.storage
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWeb3StorageCarUploadRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWeb3StorageCarUploadRequest
 */
 func (a *FilepinApiService) Web3StorageCarUpload(ctx context.Context) ApiWeb3StorageCarUploadRequest {
 	return ApiWeb3StorageCarUploadRequest{
@@ -264,7 +265,8 @@ func (a *FilepinApiService) Web3StorageCarUpload(ctx context.Context) ApiWeb3Sto
 }
 
 // Execute executes the request
-//  @return Web3StorageCarResponse
+//
+//	@return Web3StorageCarResponse
 func (a *FilepinApiService) Web3StorageCarUploadExecute(r ApiWeb3StorageCarUploadRequest) (*Web3StorageCarResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost

@@ -17,7 +17,7 @@ const (
 	// IpfsPinnerVersionMinor is Minor version component of the current release
 	IpfsPinnerVersionMinor = 1
 	// IpfsPinnerVersionPatch is Patch version component of the current release
-	IpfsPinnerVersionPatch = 11
+	IpfsPinnerVersionPatch = 12
 	clientIdentifier       = "ipfs-pinner" // Client identifier to advertise over the network
 )
 

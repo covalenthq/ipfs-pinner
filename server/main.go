@@ -24,6 +24,20 @@ import (
 	client "github.com/covalenthq/ipfs-pinner/pinclient"
 )
 
+const (
+	OK      = "OK"
+	BAD     = "BAD"
+	TIMEOUT = "TIMEOUT"
+)
+
+type State struct {
+	status string
+}
+
+func NewState() *State {
+	return &State{status: OK}
+}
+
 var (
 	emptyBytes       = []byte("")
 	WEB3_JWT         = "WEB3_JWT"
@@ -43,6 +57,7 @@ func main() {
 
 func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
 	mux := http.NewServeMux()
+	httpState := NewState()
 	if token == "" {
 		var present bool
 		token, present = os.LookupEnv(WEB3_JWT)
@@ -75,6 +90,10 @@ func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
 	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))
 	mux.Handle("/get", recoveryWrapper(downloadHttpHandler(node)))
 	mux.Handle("/cid", recoveryWrapper(cidHttpHandler(node)))
+	mux.Handle("/health", recoveryWrapper(healthHttpHandler(httpState)))
+	mux.Handle("/sabotage", recoveryWrapper(sabotageHttpHandler(httpState)))
+	mux.Handle("/recover", recoveryWrapper(recoverHttpHandler(httpState)))
+	mux.Handle("/timeout", recoveryWrapper(timeoutHttpHandler(httpState)))
 
 	log.Print("Listening...")
 	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
@@ -279,4 +298,65 @@ func downloadHandler(cidStr string, node pinner.PinnerNode) ([]byte, error) {
 		return emptyBytes, err
 	}
 	return node.UnixfsService().Get(ctx, cid)
+}
+
+func healthHttpHandler(s *State) http.Handler {
+	// Check the health of the server and return a status code accordingly
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Received /health request:", "source=", r.RemoteAddr, "status=", s.status)
+		switch s.status {
+		case OK:
+			_, err := io.WriteString(w, "I'm healthy")
+			if err != nil {
+				log.Println("cannot write %w string", err)
+			}
+			return
+		case BAD:
+			http.Error(w, "Internal Error", 500)
+			return
+		case TIMEOUT:
+			time.Sleep(30 * time.Second)
+			return
+		default:
+			_, err := io.WriteString(w, "UNKNOWN")
+			if err != nil {
+				log.Println("cannot write %w string", err)
+			}
+			return
+		}
+	}
+	return http.HandlerFunc(fn)
+}
+
+func sabotageHttpHandler(s *State) http.Handler {
+	fn := func(w http.ResponseWriter, _ *http.Request) {
+		s.status = BAD
+		_, err := io.WriteString(w, "Sabotage ON")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
+	}
+	return http.HandlerFunc(fn)
+}
+
+func recoverHttpHandler(s *State) http.Handler {
+	fn := func(w http.ResponseWriter, _ *http.Request) {
+		s.status = OK
+		_, err := io.WriteString(w, "Recovered.")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
+	}
+	return http.HandlerFunc(fn)
+}
+
+func timeoutHttpHandler(s *State) http.Handler {
+	fn := func(w http.ResponseWriter, _ *http.Request) {
+		s.status = TIMEOUT
+		_, err := io.WriteString(w, "Configured to timeout.")
+		if err != nil {
+			log.Println("cannot write %w string", err)
+		}
+	}
+	return http.HandlerFunc(fn)
 }
