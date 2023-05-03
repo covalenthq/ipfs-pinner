@@ -98,8 +98,8 @@ PinsGet List pin objects
 
 List all the pin objects, matching optional filters; when no filter is provided, only successful pins are returned
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiPinsGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPinsGetRequest
 */
 func (a *PinsApiService) PinsGet(ctx context.Context) ApiPinsGetRequest {
 	return ApiPinsGetRequest{
@@ -109,7 +109,8 @@ func (a *PinsApiService) PinsGet(ctx context.Context) ApiPinsGetRequest {
 }
 
 // Execute executes the request
-//  @return PinResults
+//
+//	@return PinResults
 func (a *PinsApiService) PinsGetExecute(r ApiPinsGetRequest) (*PinResults, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -286,8 +287,8 @@ PinsPost Add pin object
 
 Add a new pin object for the current access token
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiPinsPostRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPinsPostRequest
 */
 func (a *PinsApiService) PinsPost(ctx context.Context) ApiPinsPostRequest {
 	return ApiPinsPostRequest{
@@ -297,7 +298,8 @@ func (a *PinsApiService) PinsPost(ctx context.Context) ApiPinsPostRequest {
 }
 
 // Execute executes the request
-//  @return PinStatus
+//
+//	@return PinStatus
 func (a *PinsApiService) PinsPostExecute(r ApiPinsPostRequest) (*PinStatus, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -450,9 +452,9 @@ PinsRequestidDelete Remove pin object
 
 Remove a pin object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param requestid
- @return ApiPinsRequestidDeleteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param requestid
+	@return ApiPinsRequestidDeleteRequest
 */
 func (a *PinsApiService) PinsRequestidDelete(ctx context.Context, requestid string) ApiPinsRequestidDeleteRequest {
 	return ApiPinsRequestidDeleteRequest{
@@ -601,9 +603,9 @@ PinsRequestidGet Get pin object
 
 Get a pin object and its status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param requestid
- @return ApiPinsRequestidGetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param requestid
+	@return ApiPinsRequestidGetRequest
 */
 func (a *PinsApiService) PinsRequestidGet(ctx context.Context, requestid string) ApiPinsRequestidGetRequest {
 	return ApiPinsRequestidGetRequest{
@@ -614,7 +616,8 @@ func (a *PinsApiService) PinsRequestidGet(ctx context.Context, requestid string)
 }
 
 // Execute executes the request
-//  @return PinStatus
+//
+//	@return PinStatus
 func (a *PinsApiService) PinsRequestidGetExecute(r ApiPinsRequestidGetRequest) (*PinStatus, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -769,9 +772,9 @@ PinsRequestidPost Replace pin object
 
 Replace an existing pin object (shortcut for executing remove and add operations in one step to avoid unnecessary garbage collection of blocks present in both recursive pins)
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param requestid
- @return ApiPinsRequestidPostRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param requestid
+	@return ApiPinsRequestidPostRequest
 */
 func (a *PinsApiService) PinsRequestidPost(ctx context.Context, requestid string) ApiPinsRequestidPostRequest {
 	return ApiPinsRequestidPostRequest{
@@ -782,7 +785,8 @@ func (a *PinsApiService) PinsRequestidPost(ctx context.Context, requestid string
 }
 
 // Execute executes the request
-//  @return PinStatus
+//
+//	@return PinStatus
 func (a *PinsApiService) PinsRequestidPostExecute(r ApiPinsRequestidPostRequest) (*PinStatus, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
