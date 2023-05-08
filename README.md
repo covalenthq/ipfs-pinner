@@ -38,7 +38,7 @@ To avoid this issue, the merkle DAG thus generated is exported into special file
 
 1. Set the environment variable `WEB3_JWT`
 
-2. to start a server which listens for request on 3000 port, run:
+2. to start a server which listens for request on 3001 port, run:
 
 ```bash
 make clean server-dbg run
@@ -47,7 +47,7 @@ make clean server-dbg run
 NOTE: If you want more control over CLI params, you can run the server binary (after `make clean server-dbg`):
 
 ```bash
-./build/bin/server -jwt <WEB3_JWT> -port 3000
+./build/bin/server -jwt <WEB3_JWT> -port 3001
 ```
 
 NOTE: If you get some error when running this, check if the diagnostic is there in [known issues](#known-issues)
@@ -59,14 +59,14 @@ ipfs-pinner can be run as a server and allows two functionalities currently - `/
 - Submit a request to upload a file (using multipart/form-data):
 
 ```bash
-➜ curl -F "filedata=@file_to_upload" http://127.0.0.1:3000/upload
+➜ curl -F "filedata=@file_to_upload" http://127.0.0.1:3001/upload
 {"cid": "QmUqcL1RwbnbQ3FzmnT1aeRk8g8L5naKinJd5hCuPXxbZ2"}
 ```
 
 Failures will be reported (via "error" field in the json). E.g:
 
 ```bash
-➜ curl -F "filedata=@non_existent_file" http://127.0.0.1:3000/upload
+➜ curl -F "filedata=@non_existent_file" http://127.0.0.1:3001/upload
 {"error": "open not_exist_file: no such file or directory"}
 ```
 
@@ -83,7 +83,7 @@ There's a timeout (check code for value), on timeout the error message returned 
 If the request succeeds the raw content is sent back and it can be outputted in a file using curl. e.g.
 
 ```bash
-➜ curl -XGET http://127.0.0.1:3000/get\?cid\=bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u --output file.jpeg
+➜ curl -XGET http://127.0.0.1:3001/get\?cid\=bafybeifzst7cbujrqemiulznrkttouzshnqkrajiib5fp5te53ojs5sl5u --output file.jpeg
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  806k    0  806k    0     0  91.2M      0 --:--:-- --:--:-- --:--:--  262M
@@ -99,7 +99,7 @@ There's a timeout (check code for value) for the download request, if it doesn't
 ### Find the cid given some content
 
 ```bash
-➜ curl -F "filedata=@LICENSE" http://127.0.0.1:3000/cid
+➜ curl -F "filedata=@LICENSE" http://127.0.0.1:3001/cid
 {"cid": "bafkreicszve3ewhhrgobm366mdctki2m2qwzide5e54zh5aifnesg3ofne"}%
 ```
 
@@ -126,7 +126,7 @@ Now, we can run the container:
 ```bash
 docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
-       -p 4001:4001 -p 3000:3000  \
+       -p 4001:4001 -p 3001:3001  \
        --env WEB3_JWT=$WEB3_JWT \
     <image-id>
 ```
@@ -140,9 +140,9 @@ There's 1 docker volume that needs to be shared (and persisted) between the cont
 :4001 : swarm port for p2p  
 :8080 - http gateway (used by encapsulated ipfs-node)
 :5001: local api (should be bound to 127.0.0.1 only, and must never be exposed publicly as it allows one to control the ipfs node; also used by encapsulated ipfs-node)  
-:3000: The ipfs-pinner itself exposes its REST API on this port
+:3001: The ipfs-pinner itself exposes its REST API on this port
 
-<B> Out of the above, only the swarm port and the REST api port (3000) are essential.</B>  
+<B> Out of the above, only the swarm port and the REST api port (3001) are essential.</B>  
 
 ---
 
@@ -215,7 +215,7 @@ This effectively disables local host discovery and is recommended when running I
 ipfs-pinner currently uses some known IPFS gateways to fetch content. These gateways are expected to be run and maintained for a long time, but if you need to update the gateways list due to one of the going down, or a more efficient gateway being introduced etc. you can change the list:
 
 ```bash
-./build/bin/server -jwt <WEB3_JWT> -port 3000 -ipfs-gateway-urls "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s"
+./build/bin/server -jwt <WEB3_JWT> -port 3001 -ipfs-gateway-urls "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s"
 ```
 
 The `-ipfs-gateways-urls` is a comma separated list of http urls with a `%s` present in it, which is formatted to replace the IPFS content identifier (CID) in it.
