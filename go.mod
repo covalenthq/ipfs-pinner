@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/ipfs/go-block-format v0.1.2
-	github.com/ipfs/go-cid v0.3.2
+	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-ipfs-files v0.1.1
 	github.com/ipfs/go-ipld-format v0.4.0
 	github.com/ipfs/go-log/v2 v2.5.1
