@@ -14,13 +14,13 @@ COPY --from=builder /build/ipfs-server /app
 SHELL ["/bin/bash", "-c"]
 RUN chmod +x ./ipfs-server
 
-HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3000/health
+HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "./ipfs-server -port 3000 -jwt $WEB3_JWT" ]
+CMD [ "./ipfs-server -port 3001 -jwt $WEB3_JWT" ]
 
 # ipfs-pinner API server;
-EXPOSE 3000
+EXPOSE 3001
 # Swarm TCP; should be exposed to the public
 EXPOSE 4001
 # Daemon API; must not be exposed publicly but to client services under you control

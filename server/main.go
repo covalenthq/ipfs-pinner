@@ -46,7 +46,7 @@ var (
 )
 
 func main() {
-	portNumber := flag.Int("port", 3000, "port number for the server")
+	portNumber := flag.Int("port", 3001, "port number for the server")
 	token := flag.String("jwt", "", "JWT token for web3.storage")
 	ipfsGatewayUrls := flag.String("ipfs-gateway-urls", "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s", "comma separated list of ipfs gateway urls")
 
