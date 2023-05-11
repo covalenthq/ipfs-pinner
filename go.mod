@@ -1,6 +1,6 @@
 module github.com/covalenthq/ipfs-pinner
 
-go 1.17
+go 1.19
 
 require (
 	github.com/ipfs/go-block-format v0.1.2

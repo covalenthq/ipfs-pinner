@@ -1,5 +1,5 @@
 # Build - first phase
-FROM golang:1.18-alpine as builder
+FROM golang:1.19-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
