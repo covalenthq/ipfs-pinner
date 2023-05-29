@@ -8,7 +8,7 @@ require (
 	github.com/ipfs/go-ipfs-files v0.1.1
 	github.com/ipfs/go-ipld-format v0.4.0
 	github.com/ipfs/go-log/v2 v2.5.1
-	github.com/ipfs/interface-go-ipfs-core v0.8.2
+	github.com/ipfs/interface-go-ipfs-core v0.11.2
 	github.com/ipfs/kubo v0.18.1
 	github.com/ipld/go-car v0.4.0
 	github.com/ipld/go-ipld-prime v0.20.0
