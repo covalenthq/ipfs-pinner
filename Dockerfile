@@ -1,5 +1,5 @@
 # Build - first phase
-FROM golang:1.18-alpine as builder
+FROM golang:1.19-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
@@ -10,9 +10,7 @@ FROM alpine:3.15.7
 RUN mkdir /app
 WORKDIR /app
 RUN apk update && apk add --no-cache bash=5.1.16-r0
-COPY --from=builder /build/ipfs-server /app
-SHELL ["/bin/bash", "-c"]
-RUN chmod +x ./ipfs-server
+COPY --from=builder --chmod=700 /build/ipfs-server /app
 
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
 
