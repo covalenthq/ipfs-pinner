@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
+	coreiface "github.com/ipfs/boxo/coreiface"
 	"github.com/ipfs/kubo/config"
 	"github.com/ipfs/kubo/core"
 	icore "github.com/ipfs/kubo/core/coreapi"

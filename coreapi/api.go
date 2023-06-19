@@ -3,7 +3,7 @@ package coreapi
 import (
 	"context"
 
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
+	coreiface "github.com/ipfs/boxo/coreiface"
 	"github.com/ipfs/kubo/config"
 )
 
