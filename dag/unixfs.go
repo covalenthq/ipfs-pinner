@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"reflect"
 	"time"
@@ -119,7 +118,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 }
 
 func (api *unixfsApi) readFile(fnd files.File) ([]byte, error) {
-	data, err := ioutil.ReadAll(fnd)
+	data, err := io.ReadAll(fnd)
 	if err != nil {
 		return emptyBytes, fmt.Errorf("error reading data: %v", err)
 	}
