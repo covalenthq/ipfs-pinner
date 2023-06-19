@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
+	coreiface "github.com/ipfs/boxo/coreiface"
+	"github.com/ipfs/boxo/coreiface/options"
+	"github.com/ipfs/boxo/coreiface/path"
+	files "github.com/ipfs/boxo/files"
 	"github.com/ipfs/go-cid"
-	files "github.com/ipfs/go-ipfs-files"
 	ipldformat "github.com/ipfs/go-ipld-format"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
-	"github.com/ipfs/interface-go-ipfs-core/options"
-	"github.com/ipfs/interface-go-ipfs-core/path"
 )
 
 type unixfsApi struct {
