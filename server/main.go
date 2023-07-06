@@ -115,7 +115,7 @@ func serverStopCommandSetup() {
 	go func() {
 		<-ch
 		signal.Stop(ch)
-		log.Println("Exit command received. Exiting...")
+		log.Println("Exit command received. Exiting now...")
 
 		// this is a good place to flush everything to disk
 		// before terminating.
