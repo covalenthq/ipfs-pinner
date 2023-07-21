@@ -5,18 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"reflect"
 	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
+	coreiface "github.com/ipfs/boxo/coreiface"
+	"github.com/ipfs/boxo/coreiface/options"
+	"github.com/ipfs/boxo/coreiface/path"
+	files "github.com/ipfs/boxo/files"
 	"github.com/ipfs/go-cid"
-	files "github.com/ipfs/go-ipfs-files"
 	ipldformat "github.com/ipfs/go-ipld-format"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
-	"github.com/ipfs/interface-go-ipfs-core/options"
-	"github.com/ipfs/interface-go-ipfs-core/path"
 )
 
 type unixfsApi struct {
@@ -119,7 +118,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 }
 
 func (api *unixfsApi) readFile(fnd files.File) ([]byte, error) {
-	data, err := ioutil.ReadAll(fnd)
+	data, err := io.ReadAll(fnd)
 	if err != nil {
 		return emptyBytes, fmt.Errorf("error reading data: %v", err)
 	}

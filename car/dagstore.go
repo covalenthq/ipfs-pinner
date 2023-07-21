@@ -4,7 +4,7 @@ import (
 	"context"
 
 	blocks "github.com/ipfs/go-block-format"
-	coreiface "github.com/ipfs/interface-go-ipfs-core"
+	coreiface "github.com/ipfs/boxo/coreiface"
 
 	"github.com/ipfs/go-cid"
 )
