@@ -15,6 +15,7 @@
     - [Generate go http client go bindings via openapi](#generate-go-http-client-go-bindings-via-openapi)
   - [Known Issues](#known-issues)
     - [Permission Issue](#permission-issue)
+    - [UDP buffer size warning](#udp-buffer-size-warning)
     - [Netscan alert issue](#netscan-alert-issue)
     - [Using a different directory than ~/.ipfs](#using-a-different-directory-than-ipfs)
     - [Updating IPFS http gateways](#updating-ipfs-http-gateways)
@@ -172,6 +173,15 @@ Or above fails with a message about permission issues to access  ~/.ipfs/*, run 
 ```bash
 sudo chmod -R 700 ~/.ipfs
 ```
+
+### UDP buffer size warning
+
+On the start of ipfs-pinner, you might notice logs regarding UDP buffer size:
+```
+2023/07/26 05:43:14 failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 2048 kiB, got: 416 kiB). See https://github.com/lucas-clemente/quic-go/wiki/UDP-Receive-Buffer-Size for details.
+```
+
+Do go to the link mention in the log, or to https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes, it'll help QUIC function more effectively over high-bandwidth functions, reducing timeouts etc.
 
 ### Netscan alert issue
 
