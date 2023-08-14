@@ -7,11 +7,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"syscall"
@@ -96,10 +96,33 @@ func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
 	mux.Handle("/timeout", recoveryWrapper(timeoutHttpHandler(httpState)))
 
 	log.Print("Listening...")
+	serverStopCommandSetup()
 	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
 	if err != nil {
 		log.Println("error listening and serving on TCP network: %w", err)
 	}
+}
+
+func serverStopCommandSetup() {
+	// Catch the Ctrl-C and SIGTERM from kill command
+
+	ch := make(chan os.Signal, 1)
+
+	// Ctrl-C : sigint / os.Interrupt
+	// kill command : sigterm
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-ch
+		signal.Stop(ch)
+		log.Println("Exit command received. Exiting now...")
+
+		// this is a good place to flush everything to disk
+		// before terminating.
+
+		os.Exit(0)
+
+	}()
 }
 
 func respondError(w http.ResponseWriter, err error) {
@@ -192,7 +215,7 @@ func readContentFromRequest(r *http.Request) (string, error) {
 			break
 		}
 
-		pcontents, err := ioutil.ReadAll(part)
+		pcontents, err := io.ReadAll(part)
 		if err != nil {
 			return "", err
 		}

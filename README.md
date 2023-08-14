@@ -1,21 +1,24 @@
 # IPFS-Pinner
 
-- [Introduction](#introduction)
-- [Usage as a library](#usage-as-a-library)
-  - [A note on CID and CAR files](#a-note-on-cid-and-car-files)
-- [Running ipfs-pinner server](#running-ipfs-pinner-server)
-  - [Upload a file](#upload-a-file)
-  - [Download content (given cid)](#download-content-given-cid)
-  - [Find the cid given some content](#find-the-cid-given-some-content)
-- [Running ipfs-pinner server with docker](#running-ipfs-pinner-server-with-docker)
-  - [Docker Volume setup](#docker-volume-setup)
-  - [Port mapping setup](#port-mapping-setup)
-- [Development](#development)
-  - [Generate go http client go bindings via openapi](#generate-go-http-client-go-bindings-via-openapi)
-- [Known Issues](#known-issues)
-  - [Permission issue](#permission-issue)
-  - [Netscan alert issue](#netscan-alert-issue)
-  - [Updating IPFS http gateways](#updating-ipfs-http-gateways)
+- [IPFS-Pinner](#ipfs-pinner)
+  - [Introduction](#introduction)
+  - [Usage as a library](#usage-as-a-library)
+    - [A note on CID and CAR files](#a-note-on-cid-and-car-files)
+  - [Running ipfs-pinner server](#running-ipfs-pinner-server)
+    - [Upload a file](#upload-a-file)
+    - [Download content (given cid)](#download-content-given-cid)
+    - [Find the cid given some content](#find-the-cid-given-some-content)
+  - [Running ipfs-pinner server with docker](#running-ipfs-pinner-server-with-docker)
+    - [Docker Volume setup](#docker-volume-setup)
+    - [Port mapping setup](#port-mapping-setup)
+  - [Development](#development)
+    - [Generate go http client go bindings via openapi](#generate-go-http-client-go-bindings-via-openapi)
+  - [Known Issues](#known-issues)
+    - [Permission Issue](#permission-issue)
+    - [UDP buffer size warning](#udp-buffer-size-warning)
+    - [Netscan alert issue](#netscan-alert-issue)
+    - [Using a different directory than ~/.ipfs](#using-a-different-directory-than-ipfs)
+    - [Updating IPFS http gateways](#updating-ipfs-http-gateways)
 
 ## Introduction
 
@@ -126,7 +129,7 @@ Now, we can run the container:
 ```bash
 docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
-       -p 4001:4001 -p 3001:3001  \
+       -p 3001:3001  \
        --env WEB3_JWT=$WEB3_JWT \
     <image-id>
 ```
@@ -137,7 +140,7 @@ There's 1 docker volume that needs to be shared (and persisted) between the cont
 
 ### Port mapping setup
 
-:4001 : swarm port for p2p  
+:4001 : swarm port for p2p  (currently disabled)
 :8080 - http gateway (used by encapsulated ipfs-node)
 :5001: local api (should be bound to 127.0.0.1 only, and must never be exposed publicly as it allows one to control the ipfs node; also used by encapsulated ipfs-node)  
 :3001: The ipfs-pinner itself exposes its REST API on this port
@@ -156,7 +159,7 @@ There's 1 docker volume that needs to be shared (and persisted) between the cont
 
 ## Known Issues
 
-### permission issue
+### Permission Issue
 
 If while using the ipfs-pinner as a server, you come across any permissions issues with logs such as
 
@@ -170,6 +173,15 @@ Or above fails with a message about permission issues to access  ~/.ipfs/*, run 
 ```bash
 sudo chmod -R 700 ~/.ipfs
 ```
+
+### UDP buffer size warning
+
+On the start of ipfs-pinner, you might notice logs regarding UDP buffer size:
+```
+2023/07/26 05:43:14 failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 2048 kiB, got: 416 kiB). See https://github.com/lucas-clemente/quic-go/wiki/UDP-Receive-Buffer-Size for details.
+```
+
+Do go to the link mention in the log, or to https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes, it'll help QUIC function more effectively over high-bandwidth functions, reducing timeouts etc.
 
 ### Netscan alert issue
 
@@ -209,6 +221,10 @@ sudo systemctl start bsp-agent.service
 ```
 
 This effectively disables local host discovery and is recommended when running IPFS on machines with public IPv4 addresses.
+
+### Using a different directory than ~/.ipfs
+`~/.ipfs` is the default location for the storage of local 'add'-ed contents. When a lot of content is added to the node, this directory can bloat up and use a lot of storage.  
+Users would sometimes want to maintain a different volume to fulfil large storage requirements. As a solution, one can move the `.ipfs/` folder to a larger partition and **symlink** it on $HOME instead. Stop the ipfs-pinner before performing this process, and then restart for the effects to take place.
 
 ### Updating IPFS http gateways
 

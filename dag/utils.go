@@ -3,7 +3,7 @@ package dag
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -54,7 +54,7 @@ func (fetcher *httpContentFetcher) tryFetch(ctx context.Context, cid string, url
 
 	defer resp.Body.Close()
 	if resp.StatusCode == 200 {
-		return ioutil.ReadAll(resp.Body)
+		return io.ReadAll(resp.Body)
 	} else {
 		return emptyBytes, fmt.Errorf("status from GET %s is %d", url, resp.StatusCode)
 	}
