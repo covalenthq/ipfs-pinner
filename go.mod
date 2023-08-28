@@ -16,7 +16,7 @@ require (
 	golang.org/x/oauth2 v0.8.0
 )
 
-require github.com/ipfs/go-ipld-format v0.4.0
+require github.com/ipfs/go-ipld-format v0.6.0
 
 require (
 	bazil.org/fuse v0.0.0-20200117225306-7b5117fecadc // indirect
