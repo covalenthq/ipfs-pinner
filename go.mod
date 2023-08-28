@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/ipfs/boxo v0.8.1
-	github.com/ipfs/go-block-format v0.1.2
+	github.com/ipfs/go-block-format v0.2.0
 	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/ipfs/kubo v0.20.0
