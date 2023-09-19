@@ -8,8 +8,8 @@ import (
 	"log"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
-	gocar "github.com/ipfs/boxo/ipld/car"
 	"github.com/ipfs/go-cid"
+	gocar "github.com/ipld/go-car"
 	selectorparse "github.com/ipld/go-ipld-prime/traversal/selector/parse"
 )
 
