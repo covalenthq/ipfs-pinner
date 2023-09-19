@@ -13,6 +13,7 @@
     - [Port mapping setup](#port-mapping-setup)
   - [Development](#development)
     - [Generate go http client go bindings via openapi](#generate-go-http-client-go-bindings-via-openapi)
+    - [Improvements](#improvements)
   - [Known Issues](#known-issues)
     - [Permission Issue](#permission-issue)
     - [UDP buffer size warning](#udp-buffer-size-warning)
@@ -156,6 +157,11 @@ There's 1 docker volume that needs to be shared (and persisted) between the cont
 - use `./generate_gobindings.sh` to generate the golang bindings (for pinning services of pinata and web3.storage).
 
 - There are some fixes you would need to do (missing braces etc).
+
+### Improvements
+
+- remove the pinning service yaml (none of the pinning service api is currently used). Directly use the web3.storage goclient - https://github.com/web3-storage/go-w3s-client
+
 
 ## Known Issues
 
