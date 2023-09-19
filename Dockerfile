@@ -1,15 +1,15 @@
 # Build - first phase
-FROM golang:1.19-alpine as builder
+FROM golang:1.21-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
 # Runtime -  second phase.
-FROM alpine:3.15.7
+FROM alpine:3.18.3
 RUN mkdir /app
 WORKDIR /app
-RUN apk update && apk add --no-cache bash=5.1.16-r0
+RUN apk update && apk add --no-cache bash=5.2.15-r5
 COPY --from=builder --chmod=700 /build/ipfs-server /app
 
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
