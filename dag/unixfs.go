@@ -16,6 +16,7 @@ import (
 	files "github.com/ipfs/boxo/files"
 	"github.com/ipfs/go-cid"
 	ipldformat "github.com/ipfs/go-ipld-format"
+	mh "github.com/multiformats/go-multihash"
 )
 
 type unixfsApi struct {
@@ -35,6 +36,19 @@ func NewUnixfsAPI(ipfs coreapi.CoreExtensionAPI, cidVersion int, cidGenerationOn
 	api.addOptions = append(api.addOptions, options.Unixfs.CidVersion(cidVersion))
 	api.addOptions = append(api.addOptions, options.Unixfs.HashOnly(cidGenerationOnly))
 	api.addOptions = append(api.addOptions, options.Unixfs.Pin(!cidGenerationOnly))
+
+	// default merkle dag creation options
+	// we want to use the same options throughout, and provide these values explicitly
+	// even if the default values by ipfs libs change in future
+	api.addOptions = append(api.addOptions, options.Unixfs.Hash(mh.SHA2_256))
+	api.addOptions = append(api.addOptions, options.Unixfs.Inline(false))
+	api.addOptions = append(api.addOptions, options.Unixfs.InlineLimit(32))
+	// for cid version, raw leaves is used by default
+	api.addOptions = append(api.addOptions, options.Unixfs.RawLeaves(cidVersion == 1))
+	api.addOptions = append(api.addOptions, options.Unixfs.Chunker("size-262144"))
+	api.addOptions = append(api.addOptions, options.Unixfs.Layout(options.BalancedLayout))
+	api.addOptions = append(api.addOptions, options.Unixfs.Nocopy(false))
+
 	api.ipfs = ipfs
 
 	var err error
