@@ -9,7 +9,7 @@ RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o 
 FROM alpine:3.19
 RUN mkdir /app
 WORKDIR /app
-RUN apk upgrade && apk add --no-cache bash=5.2.21-r0
+RUN apk update && apk add --no-cache bash=5.2.21-r0
 COPY --from=builder --chmod=700 /build/ipfs-server /app
 
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
