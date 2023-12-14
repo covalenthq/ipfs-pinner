@@ -8,6 +8,13 @@
     - [Upload a file](#upload-a-file)
     - [Download content (given cid)](#download-content-given-cid)
     - [Find the cid given some content](#find-the-cid-given-some-content)
+  - [migration to UCAN and capabilities setup](#migration-to-ucan-and-capabilities-setup)
+    - [setting up w3cli](#setting-up-w3cli)
+      - [installation](#installation)
+      - [login and check spaces](#login-and-check-spaces)
+      - [generate ucan key](#generate-ucan-key)
+      - [create delegation to store/add and upload/add](#create-delegation-to-storeadd-and-uploadadd)
+      - [communicate to the operator](#communicate-to-the-operator)
   - [Running ipfs-pinner server with docker](#running-ipfs-pinner-server-with-docker)
     - [Docker Volume setup](#docker-volume-setup)
     - [Port mapping setup](#port-mapping-setup)
@@ -24,7 +31,7 @@
 ## Introduction
 
 - A wrapper on top of ipfs node, utilising go-ipfs as a library.
-- Extended support for custom file upload endpoints provided by pinata & web3.storage.
+- Extended support for custom file upload endpoints provided by web3.storage.
 - Content archive file generation and lightweight deterministic CID generation on client side (using CARs).
 - It can be used as a go library (see `binary/main.go` for usage) or as a http server.
 
@@ -106,6 +113,68 @@ There's a timeout (check code for value) for the download request, if it doesn't
 ➜ curl -F "filedata=@LICENSE" http://127.0.0.1:3001/cid
 {"cid": "bafkreicszve3ewhhrgobm366mdctki2m2qwzide5e54zh5aifnesg3ofne"}%
 ```
+
+
+## migration to UCAN and capabilities setup
+- web3.storage is sunsetting its custom upload endpoint (on 9th January, 2024), and we need to migrate from using that to w3up.
+- w3up uses UCAN which is a capabilities-based authorization system (learn more [here](https://web3.storage/docs/concepts/ucans-and-web3storage/)). 
+- In this setup, the "central account" (owned by Covalent) sets up a "space" (think namespace for data). The central account (controlled by the email) is delegated the capabilty to operate on this space.
+- among other capabilties, the central account can delegate certain capabilities (like uploading to space) to other **agents**. This has to be done at our end, and scripts will be made available for it in this repo.
+- once an agent is granted the capability, we share the credentials with the operators, who run ipfs-pinner with it, and can then upload or fetch.
+
+
+### setting up w3cli
+
+- Create a web3.storage account in the [console](https://console.web3.storage/). 
+- Create a space which you want to use to upload artifacts. We want to use different spaces for different artifacts to keep a clear separation.
+
+We'll use w3cli to login and create a new space and register.
+
+#### installation
+```bash
+➜ npm install -g @web3-storage/w3cli
+
+➜ w3 --version
+w3, 7.0.3
+```
+
+#### login and check spaces
+```bash
+➜ w3 login sudeep@covalenthq.com
+
+➜ w3 space ls
+  did:key:z6MkgSK6VEu3bvrAFtYNyjsnzG7dVXzYi3yT5TasEgeaQrCe mock_artifacts
+
+➜ w3 space use did:key:z6MkgSK6VEu3bvrAFtYNyjsnzG7dVXzYi3yT5TasEgeaQrCe
+did:key:z6MkgSK6VEu3bvrAFtYNyjsnzG7dVXzYi3yT5TasEgeaQrCe
+```
+
+The did key is the identifier for this space. Now let's generate some DIDs for an operator and delegate upload capabilities to it.
+
+#### generate ucan key
+```bash
+➜ npx ucan-key ed --json
+{
+  "did": "did:key:z6MkpzWw1fDZYMpESgVKFAT87SZAuHiCQZVBC3hmQjB18Nzj",
+  "key": "MgCbc48J8n+BMdzA4XxwYOaKmdu5Ov34jE71U8vV07IVIjO0BnJa05mNMcB8GSz1lib014QAhvAxorG6zACrstm6PBGA="
+}
+```
+
+#### create delegation to store/add and upload/add
+
+```bash
+➜ w3 delegation create -c 'store/add' -c 'upload/add' did:key:z6MkpzWw1fDZYMpESgVKFAT87SZAuHiCQZVBC3hmQjB18Nzj | base64
+```
+
+
+Copy the output. This is the delegation string.
+
+#### communicate to the operator
+
+Provide the operator with the `did`, `key` and `delegation` string. These will be passed to operator's setup of the 
+ipfs-pinner, which can then make the delegations.
+
+
 
 ## Running ipfs-pinner server with docker
 
