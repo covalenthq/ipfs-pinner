@@ -75,12 +75,12 @@ func main() {
 
 	_, err := os.ReadFile(*w3DelegationFile)
 	if err != nil {
-		log.Fatalf("error reading delegation proof file: %w", err)
+		log.Fatalf("error reading delegation proof file: %v", err)
 	}
 
 	agentSigner, err := signer.Parse(*w3AgentKey)
 	if err != nil {
-		log.Fatalf("error parsing agent signer: %w", err)
+		log.Fatalf("error parsing agent signer: %v", err)
 	}
 
 	log.Printf("agent did: %s", agentSigner.DID().DID().String())
@@ -290,7 +290,12 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 	}
 
 	defer carf.Close() // should delete the file due to unlink
-	defer syscall.Unlink(carf.Name())
+	defer func() {
+		err := syscall.Unlink(carf.Name())
+		if err != nil {
+			log.Printf("error in unlinking:%v", err)
+		}
+	}()
 
 	log.Printf("car file location: %s\n", carf.Name())
 

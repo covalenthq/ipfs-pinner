@@ -16,11 +16,7 @@ import (
 	"github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multibase"
 	"github.com/pkg/errors"
-
-	logging "github.com/ipfs/go-log/v2"
 )
-
-var logger = logging.Logger("ipfs-pinner")
 
 const UserAgent = "ipfs-pinner"
 
@@ -128,37 +124,6 @@ func httperr(resp *http.Response, e error) error {
 	return errors.Wrapf(e, "remote pinning service returned http error %d", resp.StatusCode)
 }
 
-func (c *Client) uploadFileViaPinata(ctx context.Context, file *os.File) (core.PinataResponseGetter, error) {
-	//ctx = context.WithValue(ctx, openapi.ContextServerIndex, 1) // index = 1 is the file pin url
-
-	poster := c.client.FilepinApi.PinataFileUpload(ctx)
-	opt := openapi.NewPinataOptions()
-	opt.SetCidVersion(string(rune(c.cidVersion)))
-
-	result, httpresp, err := poster.PinataOptions(*opt).File(file).Execute()
-	if err != nil {
-		err := httperr(httpresp, err)
-		return nil, err
-	}
-
-	return core.NewPinataResponseGetter(*result), nil
-}
-
 func (c *Client) uploadFileViaWeb3Storage(ctx context.Context, file *os.File) (cid.Cid, error) {
 	return c.w3up.UploadCarFile(file)
-
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// return
-
-	// poster := c.client.FilepinApi.Web3StorageCarUpload(ctx)
-	// result, httpresp, err := poster.Body(file).Execute()
-	// if err != nil {
-	// 	err := httperr(httpresp, err)
-	// 	return nil, err
-	// }
-
-	// return core.NewWeb3StorageResponseGetter(*result), nil
 }
