@@ -15,6 +15,7 @@
       - [generate ucan key](#generate-ucan-key)
       - [create delegation to store/add and upload/add](#create-delegation-to-storeadd-and-uploadadd)
       - [communicate to the operator](#communicate-to-the-operator)
+      - [operator invocation](#operator-invocation)
   - [Running ipfs-pinner server with docker](#running-ipfs-pinner-server-with-docker)
     - [Docker Volume setup](#docker-volume-setup)
     - [Port mapping setup](#port-mapping-setup)
@@ -163,7 +164,7 @@ The did key is the identifier for this space. Now let's generate some DIDs for a
 #### create delegation to store/add and upload/add
 
 ```bash
-➜ w3 delegation create -c 'store/add' -c 'upload/add' did:key:z6MkpzWw1fDZYMpESgVKFAT87SZAuHiCQZVBC3hmQjB18Nzj | base64
+➜ w3 delegation create -c 'store/add' -c 'upload/add' did:key:z6MkpzWw1fDZYMpESgVKFAT87SZAuHiCQZVBC3hmQjB18Nzj -o proof.out
 ```
 
 
@@ -171,8 +172,36 @@ Copy the output. This is the delegation string.
 
 #### communicate to the operator
 
-Provide the operator with the `did`, `key` and `delegation` string. These will be passed to operator's setup of the 
+Provide the operator with the `did`, `key` string + `proof.out` file. These will be passed to operator's setup of the 
 ipfs-pinner, which can then make the delegations.
+
+
+#### operator invocation
+
+the operator can pass the `key` for `-w3-agent-key` and proof file in `-w3-delegation-file` flag.
+
+```bash
+go run server/main.go -w3-agent-key <agent-key> -w3-delegation-file ./proof.out
+ipfs-pinner
+ipfs-pinner Version: 0.1.16
+Architecture: arm64
+Go Version: go1.20.5
+Operating System: darwin
+GOPATH=/Users/sudeep/go/
+GOROOT=/usr/local/go
+2024/01/04 15:52:05 agent did: did:key:z6MkoLvhaiE9NRYs3vJcynCM8CeyP8hXduWhE5Ter2U2x93y
+generating 2048-bit RSA keypair...done
+peer identity: QmY49BMJdGneQjJAbTPrGSqaQcLjpCE1WFkRBP6XZEHd6i
+2024/01/04 15:52:09 setting up w3up for uploads....
+2024/01/04 15:52:10 w3up agent did: did:key:z6MkoLvhaiE9NRYs3vJcynCM8CeyP8hXduWhE5Ter2U2x93y
+2024/01/04 15:52:10 w3up space did: did:key:z6MkgSK6VEu3bvrAFtYNyjsnzG7dVXzYi3yT5TasEgeaQrCe
+2024/01/04 15:52:10 w3up setup complete
+2024/01/04 15:52:10 Listening...
+2024/01/04 15:52:15 generated dag has root cid: bafybeigvijf76lcsjwcmkr6rmzovoiiqdog3muqs5vnplvf4jxh47shfiu
+2024/01/04 15:52:15 car file location: /var/folders/w0/bf3y1c7d6ys15tq97ffk5qhw0000gn/T/3475885728.car
+2024/01/04 15:53:06 w3 up output: {"root":{"/":"bafybeigvijf76lcsjwcmkr6rmzovoiiqdog3muqs5vnplvf4jxh47shfiu"}}
+2024/01/04 15:53:28 uploaded file has root cid: bafybeigvijf76lcsjwcmkr6rmzovoiiqdog3muqs5vnplvf4jxh47shfiu
+```
 
 
 
