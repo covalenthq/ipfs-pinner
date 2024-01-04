@@ -48,18 +48,19 @@ To avoid this issue, the merkle DAG thus generated is exported into special file
 
 ## Running ipfs-pinner server
 
-1. Set the environment variable `WEB3_JWT`
+1. Get the agent key, did and delegation proof from Covalent
 
-2. to start a server which listens for request on 3001 port, run:
+2. build the server and run:
 
 ```bash
-make clean server-dbg run
+make clean server-dbg
 ```
 
 NOTE: If you want more control over CLI params, you can run the server binary (after `make clean server-dbg`):
 
 ```bash
 ./build/bin/server -jwt <WEB3_JWT> -port 3001
+./build/bin/server -w3-agent-key <AGENT_KEY> -w3-delegation-file <DELEGATION_PROOF_FILE_PATH>
 ```
 
 NOTE: If you get some error when running this, check if the diagnostic is there in [known issues](#known-issues)
@@ -215,9 +216,9 @@ for ipfs-pinner to function properly with docker, we need
 
 Docker run command should have:
 
-- Volumes for data persistence
+- Volumes for data persistence; volumes containing the delegation proof
 - Port mappings
-- JWT token passed in the env
+- W3up agent key passed in the env
 
 ```bash
 docker buildx create --name builder --use --platform=linux/amd64,linux/arm64  && docker buildx build --platform=linux/amd64,linux/arm64 . -t gcr.io/covalent-project/ipfs-pinner:latest
@@ -228,8 +229,10 @@ Now, we can run the container:
 ```bash
 docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
+       --volume /Users/sudeep/repos/ipfs/w3up-testing/w3up_proof:/root/w3up_proof/ \
        -p 3001:3001  \
-       --env WEB3_JWT=$WEB3_JWT \
+       --env W3_AGENT_KEY=$W3_AGENT_KEY \
+       --env W3_DELEGATION_FILE=/root/w3up_proof/proof.out
     <image-id>
 ```
 
@@ -335,7 +338,7 @@ Users would sometimes want to maintain a different volume to fulfil large storag
 ipfs-pinner currently uses some known IPFS gateways to fetch content. These gateways are expected to be run and maintained for a long time, but if you need to update the gateways list due to one of the going down, or a more efficient gateway being introduced etc. you can change the list:
 
 ```bash
-./build/bin/server -jwt <WEB3_JWT> -port 3001 -ipfs-gateway-urls "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s"
+./build/bin/server -ipfs-gateway-urls "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s" ##OTHER PARAMS
 ```
 
 The `-ipfs-gateways-urls` is a comma separated list of http urls with a `%s` present in it, which is formatted to replace the IPFS content identifier (CID) in it.
