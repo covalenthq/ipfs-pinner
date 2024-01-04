@@ -12,6 +12,7 @@ import (
 	core "github.com/covalenthq/ipfs-pinner/core"
 	ihttp "github.com/covalenthq/ipfs-pinner/http"
 	"github.com/covalenthq/ipfs-pinner/openapi"
+	"github.com/covalenthq/ipfs-pinner/w3up"
 	"github.com/ipfs/go-cid"
 	"github.com/multiformats/go-multibase"
 	"github.com/pkg/errors"
@@ -27,17 +28,18 @@ type Client struct {
 	client     *openapi.APIClient
 	ps         core.PinningService
 	cidVersion int
+	w3up       *w3up.W3up
 }
 
-func NewClient(request ClientCreateRequest, cidVersion int) PinServiceAPI {
+func NewClient(request ClientCreateRequest, cidVersion int, w3up *w3up.W3up) PinServiceAPI {
 	// assuming we are getting a supported pinning service request
 	config := openapi.NewConfiguration()
 	if request.httpClient == nil {
 		request.httpClient = ihttp.NewHttpClient(nil)
 	}
 	config.UserAgent = UserAgent
-	bearer := fmt.Sprintf("Bearer %s", request.bearerToken)
-	config.AddDefaultHeader("Authorization", bearer)
+	//bearer := fmt.Sprintf("Bearer %s", request.bearerToken)
+	//config.AddDefaultHeader("Authorization", bearer)
 	config.Servers = openapi.ServerConfigurations{
 		openapi.ServerConfiguration{
 			URL:         request.pinningServiceBaseUrl,
@@ -50,7 +52,7 @@ func NewClient(request ClientCreateRequest, cidVersion int) PinServiceAPI {
 	}
 	config.HTTPClient = request.httpClient
 
-	return &Client{client: openapi.NewAPIClient(config), ps: request.ps, cidVersion: cidVersion}
+	return &Client{client: openapi.NewAPIClient(config), ps: request.ps, cidVersion: cidVersion, w3up: w3up}
 }
 
 func (c *Client) IsIPFSSupportedFor(ps core.PinningService) bool {
@@ -90,24 +92,12 @@ func (c *Client) Add(ctx context.Context, cid cid.Cid, opts ...AddOption) (core.
 }
 
 func (c *Client) UploadFile(ctx context.Context, file *os.File) (cid.Cid, error) {
-	var err error
-	var fcid core.CidGetter
-	switch c.ps {
-	case core.Pinata:
-		fcid, err = c.uploadFileViaPinata(ctx, file)
-
-	case core.Web3Storage:
-		fcid, err = c.uploadFileViaWeb3Storage(ctx, file)
-
-	default:
-		logger.Fatalf("only pinata supported for file upload")
-	}
-
+	fcid, err := c.uploadFileViaWeb3Storage(ctx, file)
 	if err != nil {
 		return cid.Undef, fmt.Errorf("%w", err)
 	}
 
-	return fcid.GetCid(), nil
+	return fcid, nil
 }
 
 func (c *Client) ServiceType() core.PinningService {
@@ -154,13 +144,21 @@ func (c *Client) uploadFileViaPinata(ctx context.Context, file *os.File) (core.P
 	return core.NewPinataResponseGetter(*result), nil
 }
 
-func (c *Client) uploadFileViaWeb3Storage(ctx context.Context, file *os.File) (core.Web3StorageResponseGetter, error) {
-	poster := c.client.FilepinApi.Web3StorageCarUpload(ctx)
-	result, httpresp, err := poster.Body(file).Execute()
-	if err != nil {
-		err := httperr(httpresp, err)
-		return nil, err
-	}
+func (c *Client) uploadFileViaWeb3Storage(ctx context.Context, file *os.File) (cid.Cid, error) {
+	return c.w3up.UploadCarFile(file)
 
-	return core.NewWeb3StorageResponseGetter(*result), nil
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return
+
+	// poster := c.client.FilepinApi.Web3StorageCarUpload(ctx)
+	// result, httpresp, err := poster.Body(file).Execute()
+	// if err != nil {
+	// 	err := httperr(httpresp, err)
+	// 	return nil, err
+	// }
+
+	// return core.NewWeb3StorageResponseGetter(*result), nil
 }

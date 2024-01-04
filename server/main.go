@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -22,6 +21,8 @@ import (
 	pinner "github.com/covalenthq/ipfs-pinner"
 	"github.com/covalenthq/ipfs-pinner/core"
 	client "github.com/covalenthq/ipfs-pinner/pinclient"
+	"github.com/web3-storage/go-ucanto/did"
+	"github.com/web3-storage/go-ucanto/principal/ed25519/signer"
 )
 
 const (
@@ -38,53 +39,62 @@ func NewState() *State {
 	return &State{status: OK}
 }
 
+type Config struct {
+	portNumber          int
+	w3AgentKey          string
+	w3AgentDid          did.DID
+	delegationProofPath string
+	ipfsGatewayUrls     []string
+}
+
 var (
-	emptyBytes       = []byte("")
-	WEB3_JWT         = "WEB3_JWT"
+	emptyBytes = []byte("")
+
 	DOWNLOAD_TIMEOUT = 12 * time.Minute // download can take a lot of time if it's not locally present
 	UPLOAD_TIMEOUT   = 60 * time.Second // uploads of around 6MB files happen in less than 10s typically
 )
 
 func main() {
 	portNumber := flag.Int("port", 3001, "port number for the server")
-	token := flag.String("jwt", "", "JWT token for web3.storage")
+
+	w3AgentKey := flag.String("w3-agent-key", "", "w3 agent key")
+	w3DelegationFile := flag.String("w3-delegation-file", "", "w3 delegation file")
+
 	ipfsGatewayUrls := flag.String("ipfs-gateway-urls", "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s", "comma separated list of ipfs gateway urls")
 
 	flag.Parse()
 	core.Version()
-	setUpAndRunServer(*portNumber, *token, *ipfsGatewayUrls)
+
+	if *w3AgentKey == "" {
+		log.Fatalf("w3 agent key is required")
+	}
+
+	if *w3DelegationFile == "" {
+		log.Fatalf("w3 delegation file is required")
+	}
+
+	_, err := os.ReadFile(*w3DelegationFile)
+	if err != nil {
+		log.Fatalf("error reading delegation proof file: %w", err)
+	}
+
+	agentSigner, err := signer.Parse(*w3AgentKey)
+	if err != nil {
+		log.Fatalf("error parsing agent signer: %w", err)
+	}
+
+	log.Printf("agent did: %s", agentSigner.DID().DID().String())
+
+	setUpAndRunServer(Config{*portNumber, *w3AgentKey, agentSigner.DID().DID(), *w3DelegationFile, strings.Split(*ipfsGatewayUrls, ",")})
 }
 
-func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
+func setUpAndRunServer(config Config) {
 	mux := http.NewServeMux()
 	httpState := NewState()
-	if token == "" {
-		var present bool
-		token, present = os.LookupEnv(WEB3_JWT)
-		if !present {
-			log.Fatalf("token (%s) not found in env", WEB3_JWT)
-		}
-	}
 
-	var ipfsGatewayUrlArr []string
-	if ipfsGatewayUrls != "" {
-		ipfsGatewayUrlArr = strings.Split(ipfsGatewayUrls, ",")
-		for _, ipfsUrlStr := range ipfsGatewayUrlArr {
-			if !strings.Contains(ipfsUrlStr, "%s") {
-				log.Fatalf("ipfs gateway url %s does not contain %%s", ipfsUrlStr)
-			}
-
-			if _, err := url.Parse(fmt.Sprintf(ipfsUrlStr, "sample_cid")); err != nil {
-				log.Fatalf("ipfs gateway url %s is not a valid url", ipfsUrlStr)
-			}
-		}
-	} else {
-		log.Fatalf("ipfs gateway urls not found in params")
-	}
-
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+	clientCreateReq := client.NewClientRequest(core.Web3Storage).W3AgentKey(config.w3AgentKey).W3AgentDid(config.w3AgentDid).DelegationProofPath(config.delegationProofPath)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, ipfsGatewayUrlArr).CidVersion(1).CidComputeOnly(false)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, config.ipfsGatewayUrls).CidVersion(1).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)
 
 	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))
@@ -97,7 +107,7 @@ func setUpAndRunServer(portNumber int, token, ipfsGatewayUrls string) {
 
 	log.Print("Listening...")
 	serverStopCommandSetup()
-	err := http.ListenAndServe(":"+strconv.Itoa(portNumber), mux)
+	err := http.ListenAndServe(":"+strconv.Itoa(config.portNumber), mux)
 	if err != nil {
 		log.Println("error listening and serving on TCP network: %w", err)
 	}
@@ -280,12 +290,7 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 	}
 
 	defer carf.Close() // should delete the file due to unlink
-
-	err = syscall.Unlink(carf.Name())
-	if err != nil {
-		log.Printf("%v", err)
-		return cid.Undef, err
-	}
+	defer syscall.Unlink(carf.Name())
 
 	log.Printf("car file location: %s\n", carf.Name())
 
