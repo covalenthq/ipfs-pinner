@@ -17,6 +17,8 @@
       - [communicate to the operator](#communicate-to-the-operator)
       - [operator invocation](#operator-invocation)
   - [Running ipfs-pinner server with docker](#running-ipfs-pinner-server-with-docker)
+    - [Running the image](#running-the-image)
+    - [Building the docker image](#building-the-docker-image)
     - [Docker Volume setup](#docker-volume-setup)
     - [Port mapping setup](#port-mapping-setup)
   - [Development](#development)
@@ -216,36 +218,46 @@ for ipfs-pinner to function properly with docker, we need
 
 Docker run command should have:
 
-- Volumes for data persistence; volumes containing the delegation proof
+- Volumes for data persistence;
 - Port mappings
 - W3up agent key passed in the env
 
+
+### Running the image
+
+Copy the delegation proof file into the ipfs directory which will be mapped onto the docker image.
+
 ```bash
-docker buildx create --name builder --use --platform=linux/amd64,linux/arm64  && docker buildx build --platform=linux/amd64,linux/arm64 . -t gcr.io/covalent-project/ipfs-pinner:latest
+mv proof.out /tmp/data/.ipfs/
 ```
 
-Now, we can run the container:
+Then one can run the docker container:
 
 ```bash
 docker container run --detach --name ipfs-pinner-instance \
        --volume /tmp/data/.ipfs/:/root/.ipfs/  \
-       --volume /Users/sudeep/repos/ipfs/w3up-testing/w3up_proof:/root/w3up_proof/ \
        -p 3001:3001  \
        --env W3_AGENT_KEY=$W3_AGENT_KEY \
-       --env W3_DELEGATION_FILE=/root/w3up_proof/proof.out
+       --env W3_DELEGATION_FILE=/root/.ipfs/proof.out
     <image-id>
+```
+
+
+### Building the docker image
+```bash
+docker buildx create --name builder --use --platform=linux/amd64,linux/arm64  && docker buildx build --platform=linux/amd64,linux/arm64 . -t gcr.io/covalent-project/ipfs-pinner:latest
 ```
 
 ### Docker Volume setup
 
-There's 1 docker volume that needs to be shared (and persisted) between the container and the host - this `~/.ipfs` directory needs to have its lifecycle unaffected by container lifecycle (since it contains the merklelized nodes, blockstore etc.), and so that is docker volume managed.  
+There's 1 docker volume that needs to be shared (and persisted) between the container and the host - the `~/.ipfs` directory, which needs to have its lifecycle unaffected by container lifecycle (since it contains the merklelized nodes, blockstore etc.), and so that is docker volume managed.  
 
 ### Port mapping setup
 
-:4001 : swarm port for p2p  (currently disabled)
-:8080 - http gateway (used by encapsulated ipfs-node)
-:5001: local api (should be bound to 127.0.0.1 only, and must never be exposed publicly as it allows one to control the ipfs node; also used by encapsulated ipfs-node)  
-:3001: The ipfs-pinner itself exposes its REST API on this port
+`:4001` - swarm port for p2p  (currently disabled)  
+`:8080` - http gateway (used by encapsulated ipfs-node)  
+`:5001` - local api (should be bound to 127.0.0.1 only, and must never be exposed publicly as it allows one to control the ipfs node; also used by encapsulated ipfs-node)  
+`:3001` - The ipfs-pinner itself exposes its REST API on this port  
 
 <B> Out of the above, only the swarm port and the REST api port (3001) are essential.</B>  
 
