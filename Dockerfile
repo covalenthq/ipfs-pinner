@@ -9,8 +9,7 @@ RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o 
 FROM alpine:3.19
 RUN mkdir /app
 WORKDIR /app
-
-RUN apk update && apk add --no-cache bash=5.2.15-r5 nodejs npm git && npm install -g @web3-storage/w3cli
+RUN apk update && apk add --no-cache bash nodejs npm git && npm install -g @web3-storage/w3cli
 COPY --from=builder --chmod=700 /build/ipfs-server /app
 
 RUN apk del git && rm -rf /var/cache/apk/* /root/.npm /tmp/*
