@@ -18,12 +18,7 @@ var WEB3_JWT = "WEB3_JWT"
 var UPLOAD_FILE = "./main.go" // uploading current file itself
 
 func main() {
-	token, present := os.LookupEnv(WEB3_JWT)
-	if !present {
-		log.Fatalf("token (%s) not found in env", WEB3_JWT)
-	}
-
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).BearerToken(token)
+	clientCreateReq := client.NewClientRequest(core.Web3Storage)
 	// check if cid compute true works with car uploads
 	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, []string{"https://w3s.link/ipfs/%s"}).CidVersion(1).CidComputeOnly(false)
 	node := pinner.NewPinnerNode(*nodeCreateReq)

@@ -5,15 +5,15 @@
 package pinner
 
 import (
+	"log"
+
 	car "github.com/covalenthq/ipfs-pinner/car"
 	"github.com/covalenthq/ipfs-pinner/core"
 	"github.com/covalenthq/ipfs-pinner/coreapi"
 	"github.com/covalenthq/ipfs-pinner/dag"
 	"github.com/covalenthq/ipfs-pinner/pinclient"
-	logging "github.com/ipfs/go-log/v2"
+	"github.com/covalenthq/ipfs-pinner/w3up"
 )
-
-var logger = logging.Logger("ipfs-pinner")
 
 type pinnerNode struct {
 	ipfsCore      coreapi.CoreExtensionAPI
@@ -26,12 +26,28 @@ func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
 	node := pinnerNode{}
 	ipfsNode, err := core.CreateIpfsNode(req.cidComputeOnly)
 	if err != nil {
-		logger.Fatal("error initializing ipfs node: ", err)
+		log.Fatal("error initializing ipfs node: ", err)
 	}
 
 	node.ipfsCore = coreapi.NewCoreExtensionApi(ipfsNode)
 
-	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest, req.cidVersion)
+	//SETUP W3UP
+	log.Print("setting up w3up for uploads....")
+	w3up := w3up.NewW3up(req.pinServiceRequest.W3_AgentKey, req.pinServiceRequest.W3_AgentDid, req.pinServiceRequest.W3_DelegationProofPath)
+	agentDid, err := w3up.WhoAmI()
+	if err != nil {
+		log.Fatal("error getting agent did: ", err)
+	}
+	log.Printf("w3up agent did: %s\n", agentDid.String())
+
+	spaceDid, err := w3up.SpaceAdd()
+	if err != nil {
+		log.Fatal("error adding space: ", err)
+	}
+	log.Printf("w3up space did: %s\n", spaceDid.String())
+	log.Print("w3up setup complete")
+
+	node.pinApiClient = pinclient.NewClient(req.pinServiceRequest, req.cidVersion, w3up)
 	node.carExporter = car.NewCarExporter(node.ipfsCore)
 	node.unixfsService = dag.NewUnixfsAPI(node.ipfsCore, req.cidVersion, req.cidComputeOnly, req.ipfsFetchUrls)
 

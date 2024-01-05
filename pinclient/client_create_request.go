@@ -4,14 +4,20 @@ import (
 	"net/http"
 
 	"github.com/covalenthq/ipfs-pinner/core"
+	"github.com/web3-storage/go-ucanto/did"
 )
 
 type ClientCreateRequest struct {
 	ps                    core.PinningService
 	pinningServiceBaseUrl string
 	filePinBaseUrl        string
-	bearerToken           string
-	httpClient            *http.Client
+	//bearerToken           string
+
+	W3_AgentKey            string
+	W3_AgentDid            did.DID
+	W3_DelegationProofPath string
+
+	httpClient *http.Client
 }
 
 func NewClientRequest(ps core.PinningService) ClientCreateRequest {
@@ -21,8 +27,18 @@ func NewClientRequest(ps core.PinningService) ClientCreateRequest {
 	return request
 }
 
-func (r ClientCreateRequest) BearerToken(token string) ClientCreateRequest {
-	r.bearerToken = token
+func (r ClientCreateRequest) W3AgentKey(key string) ClientCreateRequest {
+	r.W3_AgentKey = key
+	return r
+}
+
+func (r ClientCreateRequest) W3AgentDid(did did.DID) ClientCreateRequest {
+	r.W3_AgentDid = did
+	return r
+}
+
+func (r ClientCreateRequest) DelegationProofPath(proofPath string) ClientCreateRequest {
+	r.W3_DelegationProofPath = proofPath
 	return r
 }
 

@@ -13,11 +13,11 @@ const (
 	Web3Storage PinningService = "web3.storage"
 	Other       PinningService = "other"
 	// IpfsPinnerVersionMajor is Major version component of the current release
-	IpfsPinnerVersionMajor = 0
+	IpfsPinnerVersionMajor = 1
 	// IpfsPinnerVersionMinor is Minor version component of the current release
-	IpfsPinnerVersionMinor = 1
+	IpfsPinnerVersionMinor = 0
 	// IpfsPinnerVersionPatch is Patch version component of the current release
-	IpfsPinnerVersionPatch = 16
+	IpfsPinnerVersionPatch = 0
 	clientIdentifier       = "ipfs-pinner" // Client identifier to advertise over the network
 )
 
