@@ -13,7 +13,9 @@ require (
 	github.com/ipld/go-ipld-prime v0.21.0
 	github.com/multiformats/go-multiaddr v0.10.1
 	github.com/multiformats/go-multibase v0.2.0
+	github.com/multiformats/go-multihash v0.2.3
 	github.com/pkg/errors v0.9.1
+	github.com/web3-storage/go-ucanto v0.1.0
 	github.com/ybbus/httpretry v1.0.2
 	golang.org/x/oauth2 v0.8.0
 )
@@ -136,7 +138,6 @@ require (
 	github.com/multiformats/go-multiaddr-dns v0.3.1 // indirect
 	github.com/multiformats/go-multiaddr-fmt v0.1.0 // indirect
 	github.com/multiformats/go-multicodec v0.9.0 // indirect
-	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-multistream v0.4.1 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect

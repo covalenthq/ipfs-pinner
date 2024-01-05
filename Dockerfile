@@ -9,13 +9,15 @@ RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o 
 FROM alpine:3.18.3
 RUN mkdir /app
 WORKDIR /app
-RUN apk update && apk add --no-cache bash=5.2.15-r5
+RUN apk update && apk add --no-cache bash=5.2.15-r5 nodejs npm git && npm install -g @web3-storage/w3cli
 COPY --from=builder --chmod=700 /build/ipfs-server /app
+
+RUN apk del git && rm -rf /var/cache/apk/* /root/.npm /tmp/*
 
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "./ipfs-server -port 3001 -jwt $WEB3_JWT" ]
+CMD [ "./ipfs-server -port 3001 -w3-agent-key $W3_AGENT_KEY -w3-delegation-file $W3_DELEGATION_FILE" ]
 
 # ipfs-pinner API server;
 EXPOSE 3001
