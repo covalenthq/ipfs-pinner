@@ -61,7 +61,6 @@ make clean server-dbg
 NOTE: If you want more control over CLI params, you can run the server binary (after `make clean server-dbg`):
 
 ```bash
-./build/bin/server -jwt <WEB3_JWT> -port 3001
 ./build/bin/server -w3-agent-key <AGENT_KEY> -w3-delegation-file <DELEGATION_PROOF_FILE_PATH>
 ```
 
