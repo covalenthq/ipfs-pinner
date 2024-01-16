@@ -32,7 +32,7 @@ func (w3up *W3up) WhoAmI() (did.DID, error) {
 	cmd := exec.Command("bash", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("error initializing w3up: ", string(output))
+		log.Fatal("error initializing w3up: ", string(output), err)
 		return did.DID{}, err
 	}
 
@@ -49,7 +49,7 @@ func (w3up *W3up) SpaceAdd() (did.DID, error) {
 	cmd := exec.Command("bash", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("error adding w3up space: ", string(output))
+		log.Fatal("error adding w3up space: ", string(output), err)
 		return did.DID{}, err
 	}
 
@@ -67,7 +67,7 @@ func (w3up *W3up) UploadCarFile(carFile *os.File) (cid.Cid, error) {
 	cmd := exec.Command("bash", "-c", command)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("error uploading car file: ", string(output))
+		log.Fatal("error uploading car file: ", string(output), err)
 		return cid.Undef, err
 	}
 
