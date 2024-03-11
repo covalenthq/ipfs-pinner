@@ -319,6 +319,19 @@ func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 	log.Printf("uploaded file has root cid: %s\n", ccid)
 
 	carf.Close()
+
+	assertEquals(fcid, ccid)
+	log.Printf("the two cids match: %s\n", ccid.String())
+
+	log.Printf("removing dag...")
+	curr := time.Now().UnixMilli()
+	err = node.UnixfsService().RemoveDag(ctx, ccid)
+	after := time.Now().UnixMilli()
+	log.Println("time taken:", after-curr)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	return ccid, nil
 }
 
@@ -392,4 +405,10 @@ func timeoutHttpHandler(s *State) http.Handler {
 		}
 	}
 	return http.HandlerFunc(fn)
+}
+
+func assertEquals(obj1 interface{}, obj2 interface{}) {
+	if obj1 != obj2 {
+		log.Fatalf("fail %v and %v doesn't match", obj1, obj2)
+	}
 }
