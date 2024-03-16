@@ -66,6 +66,12 @@ NOTE: If you want more control over CLI params, you can run the server binary (a
 
 NOTE: If you get some error when running this, check if the diagnostic is there in [known issues](#known-issues)
 
+NOTE: If you want to run the server with garbage collection enabled, you can run the server binary with the `--enable-gc` flag:
+
+```bash
+./build/bin/server -w3-agent-key <AGENT_KEY> -w3-delegation-file <DELEGATION_PROOF_FILE_PATH> --enable-gc
+```
+
 ipfs-pinner can be run as a server and allows two functionalities currently - `/get` and `/upload`
 
 ### Upload a file

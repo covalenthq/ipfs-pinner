@@ -9,14 +9,16 @@ type PinnerNodeCreateRequest struct {
 	cidComputeOnly    bool
 	cidVersion        int
 	ipfsFetchUrls     []string
+	enableGC          bool
 }
 
-func NewNodeRequest(clientRequest pinclient.ClientCreateRequest, ipfsFetchUrls []string) *PinnerNodeCreateRequest {
+func NewNodeRequest(clientRequest pinclient.ClientCreateRequest, ipfsFetchUrls []string, enableGC bool) *PinnerNodeCreateRequest {
 	request := new(PinnerNodeCreateRequest)
 	request.cidVersion = 0
 	request.cidComputeOnly = true
 	request.pinServiceRequest = clientRequest
 	request.ipfsFetchUrls = ipfsFetchUrls
+	request.enableGC = enableGC
 	return request
 }
 
