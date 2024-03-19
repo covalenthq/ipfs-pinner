@@ -45,6 +45,11 @@ type Config struct {
 	w3AgentDid          did.DID
 	delegationProofPath string
 	ipfsGatewayUrls     []string
+	enableGC            bool
+}
+
+func NewConfig(portNumber int, w3AgentKey string, w3AgentDid did.DID, delegationProofPath string, ipfsGatewayUrls []string, enableGC bool) *Config {
+	return &Config{portNumber, w3AgentKey, w3AgentDid, delegationProofPath, ipfsGatewayUrls, enableGC}
 }
 
 var (
@@ -61,6 +66,8 @@ func main() {
 	w3DelegationFile := flag.String("w3-delegation-file", "", "w3 delegation file")
 
 	ipfsGatewayUrls := flag.String("ipfs-gateway-urls", "https://w3s.link/ipfs/%s,https://dweb.link/ipfs/%s,https://ipfs.io/ipfs/%s", "comma separated list of ipfs gateway urls")
+
+	enableGC := flag.Bool("enable-gc", false, "enable garbage collection")
 
 	flag.Parse()
 	core.Version()
@@ -85,17 +92,25 @@ func main() {
 
 	log.Printf("agent did: %s", agentSigner.DID().DID().String())
 
-	setUpAndRunServer(Config{*portNumber, *w3AgentKey, agentSigner.DID().DID(), *w3DelegationFile, strings.Split(*ipfsGatewayUrls, ",")})
+	config := NewConfig(*portNumber, *w3AgentKey, agentSigner.DID().DID(), *w3DelegationFile, strings.Split(*ipfsGatewayUrls, ","), *enableGC)
+
+	setUpAndRunServer(*config)
 }
 
 func setUpAndRunServer(config Config) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	mux := http.NewServeMux()
 	httpState := NewState()
 
-	clientCreateReq := client.NewClientRequest(core.Web3Storage).W3AgentKey(config.w3AgentKey).W3AgentDid(config.w3AgentDid).DelegationProofPath(config.delegationProofPath)
+	clientCreateReq := client.NewClientRequest(core.Web3Storage).
+		W3AgentKey(config.w3AgentKey).
+		W3AgentDid(config.w3AgentDid).
+		DelegationProofPath(config.delegationProofPath).
+		GcEnable(config.enableGC)
 	// check if cid compute true works with car uploads
-	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, config.ipfsGatewayUrls).CidVersion(1).CidComputeOnly(false)
-	node := pinner.NewPinnerNode(*nodeCreateReq)
+	nodeCreateReq := pinner.NewNodeRequest(clientCreateReq, config.ipfsGatewayUrls, config.enableGC).CidVersion(1).CidComputeOnly(false)
+	node := pinner.NewPinnerNode(ctx, *nodeCreateReq)
 
 	mux.Handle("/upload", recoveryWrapper(uploadHttpHandler(node)))
 	mux.Handle("/get", recoveryWrapper(downloadHttpHandler(node)))
