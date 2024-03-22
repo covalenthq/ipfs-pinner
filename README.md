@@ -66,6 +66,9 @@ NOTE: If you want more control over CLI params, you can run the server binary (a
 
 NOTE: If you get some error when running this, check if the diagnostic is there in [known issues](#known-issues)
 
+NOTE: If you want to run the server with garbage collection enabled, you can run the server binary with the `--enable-gc` flag:
+Garbage Collector can be configured through IPFS config file `~/.ipfs/config`. More information can be found [here](https://github.com/ipfs/kubo/blob/master/docs/config.md#datastore)
+
 ipfs-pinner can be run as a server and allows two functionalities currently - `/get` and `/upload`
 
 ### Upload a file

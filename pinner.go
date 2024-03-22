@@ -5,6 +5,7 @@
 package pinner
 
 import (
+	"context"
 	"log"
 
 	car "github.com/covalenthq/ipfs-pinner/car"
@@ -22,14 +23,18 @@ type pinnerNode struct {
 	pinApiClient  pinclient.PinServiceAPI
 }
 
-func NewPinnerNode(req PinnerNodeCreateRequest) PinnerNode {
+func NewPinnerNode(ctx context.Context, req PinnerNodeCreateRequest) PinnerNode {
 	node := pinnerNode{}
-	ipfsNode, err := core.CreateIpfsNode(req.cidComputeOnly)
+	ipfsNode, err := core.CreateIpfsNode(ctx, req.cidComputeOnly)
 	if err != nil {
 		log.Fatal("error initializing ipfs node: ", err)
 	}
 
 	node.ipfsCore = coreapi.NewCoreExtensionApi(ipfsNode)
+	if req.enableGC {
+		log.Print("enabling garbage collection....")
+		node.ipfsCore.GC().InitPeriodicGC(ctx)
+	}
 
 	//SETUP W3UP
 	log.Print("setting up w3up for uploads....")

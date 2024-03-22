@@ -43,3 +43,12 @@ func (gci *garbageCollectorImpl) GarbageCollect(ctx context.Context) {
 		log.Println("error getting garbage collector: %w", err)
 	}
 }
+
+func (gci *garbageCollectorImpl) InitPeriodicGC(ctx context.Context) <-chan error {
+	errc := make(chan error)
+	go func() {
+		errc <- corerepo.PeriodicGC(ctx, gci.node)
+		close(errc)
+	}()
+	return errc
+}
