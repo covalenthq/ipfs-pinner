@@ -47,7 +47,14 @@ func (gci *garbageCollectorImpl) GarbageCollect(ctx context.Context) {
 func (gci *garbageCollectorImpl) InitPeriodicGC(ctx context.Context) <-chan error {
 	errc := make(chan error)
 	go func() {
-		errc <- corerepo.PeriodicGC(ctx, gci.node)
+		log.Println("Starting periodic GC")
+		err := corerepo.PeriodicGC(ctx, gci.node)
+		if err != nil {
+			log.Println("error getting garbage collector: %w", err)
+		} else {
+			log.Println("Periodic GC completed")
+		}
+		errc <- err
 		close(errc)
 	}()
 	return errc
