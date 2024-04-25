@@ -16,6 +16,7 @@ type ClientCreateRequest struct {
 	W3_AgentKey            string
 	W3_AgentDid            did.DID
 	W3_DelegationProofPath string
+	GC_Enable              bool
 
 	httpClient *http.Client
 }
@@ -54,5 +55,10 @@ func (r ClientCreateRequest) FilePinBaseUrl(url string) ClientCreateRequest {
 
 func (r ClientCreateRequest) HttpClient(client http.Client) ClientCreateRequest {
 	r.httpClient = &client
+	return r
+}
+
+func (r ClientCreateRequest) GcEnable(gcEnable bool) ClientCreateRequest {
+	r.GC_Enable = gcEnable
 	return r
 }

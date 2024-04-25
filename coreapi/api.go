@@ -15,4 +15,5 @@ type CoreExtensionAPI interface {
 
 type GarbageCollectAPI interface {
 	GarbageCollect(ctx context.Context)
+	InitPeriodicGC(ctx context.Context) <-chan error
 }
