@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/covalenthq/ipfs-pinner/coreapi"
-	coreiface "github.com/ipfs/boxo/coreiface"
-	"github.com/ipfs/boxo/coreiface/options"
-	"github.com/ipfs/boxo/coreiface/path"
 	files "github.com/ipfs/boxo/files"
+	"github.com/ipfs/boxo/path"
 	"github.com/ipfs/go-cid"
 	ipldformat "github.com/ipfs/go-ipld-format"
+	coreiface "github.com/ipfs/kubo/core/coreiface"
+	"github.com/ipfs/kubo/core/coreiface/options"
 	mh "github.com/multiformats/go-multihash"
 )
 
@@ -68,11 +68,16 @@ func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Ci
 	if err != nil {
 		return cid.Undef, err
 	}
-	return rpath.Cid(), nil
+	return rpath.RootCid(), nil
 }
 
 func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
-	rp, err := api.ipfs.ResolvePath(ctx, path.New(cid.String()))
+	path, err := path.NewPath(cid.String())
+	if err != nil {
+		return fmt.Errorf("failed to create path: %w", err)
+	}
+
+	rp, _, err := api.ipfs.ResolvePath(ctx, path)
 	if err != nil {
 		return err
 	}
@@ -101,7 +106,12 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 		effectiveNode = api.ipfs
 	}
 
-	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path.New(cidStr))
+	path, err := path.NewPath(cidStr)
+	if err != nil {
+		return emptyBytes, fmt.Errorf("failed to create path: %w", err)
+	}
+
+	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path)
 	if ipldformat.IsNotFound(err) || errors.Is(err, context.DeadlineExceeded) {
 		if api.peeringAvailable {
 			log.Printf("trying out http search as ipfs p2p failed: %s\n", err)

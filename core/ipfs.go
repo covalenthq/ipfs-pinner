@@ -23,7 +23,7 @@ func CreateIpfsNode(ctx context.Context, cidComputeOnly bool) (*core.IpfsNode, e
 
 	var err error
 	if cidComputeOnly {
-		cfg.NilRepo = true
+		cfg.Repo = nil
 	} else {
 		cfg.Routing = libp2p.DHTOption
 		cfg.Host = libp2p.DefaultHostOption

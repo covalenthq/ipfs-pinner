@@ -1,12 +1,12 @@
 # Build - first phase
-FROM golang:1.21-alpine as builder
+FROM golang:1.22-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
 # Runtime -  second phase.
-FROM alpine:3.19
+FROM alpine:3.20
 RUN mkdir /app
 WORKDIR /app
 RUN apk update && apk add --no-cache bash nodejs npm git && npm install -g @web3-storage/w3cli
