@@ -72,12 +72,7 @@ func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Ci
 }
 
 func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
-	path, err := path.NewPath(cid.String())
-	if err != nil {
-		return fmt.Errorf("failed to create path: %w", err)
-	}
-
-	rp, _, err := api.ipfs.ResolvePath(ctx, path)
+	rp, _, err := api.ipfs.ResolvePath(ctx, path.FromCid(cid))
 	if err != nil {
 		return err
 	}
@@ -106,12 +101,7 @@ func (api *unixfsApi) Get(ctx context.Context, cid cid.Cid) ([]byte, error) {
 		effectiveNode = api.ipfs
 	}
 
-	path, err := path.NewPath(cidStr)
-	if err != nil {
-		return emptyBytes, fmt.Errorf("failed to create path: %w", err)
-	}
-
-	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path)
+	node, err := effectiveNode.Unixfs().Get(timeoutCtx, path.FromCid(cid))
 	if ipldformat.IsNotFound(err) || errors.Is(err, context.DeadlineExceeded) {
 		if api.peeringAvailable {
 			log.Printf("trying out http search as ipfs p2p failed: %s\n", err)
