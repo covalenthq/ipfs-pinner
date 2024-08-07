@@ -17,7 +17,7 @@ RUN apk del git && rm -rf /var/cache/apk/* /root/.npm /tmp/*
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "./ipfs-server -port 3001 -w3-agent-key $W3_AGENT_KEY -w3-delegation-file $W3_DELEGATION_FILE --enable-gc" ]
+CMD [ "./ipfs-server -port 3001 -enable-gc-w3-agent-key $W3_AGENT_KEY -w3-delegation-file $W3_DELEGATION_FILE -enable-gc" ]
 
 # ipfs-pinner API server;
 EXPOSE 3001

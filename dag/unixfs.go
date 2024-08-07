@@ -72,9 +72,12 @@ func (api *unixfsApi) GenerateDag(ctx context.Context, reader io.Reader) (cid.Ci
 }
 
 func (api *unixfsApi) RemoveDag(ctx context.Context, cid cid.Cid) error {
-	rp, _, err := api.ipfs.ResolvePath(ctx, path.FromCid(cid))
+	rp, rs, err := api.ipfs.ResolvePath(ctx, path.FromCid(cid))
 	if err != nil {
 		return err
+	}
+	if rs != nil {
+		return errors.New("cannot remove a dag that is not local")
 	}
 
 	err = api.ipfs.Pin().Rm(ctx, rp, options.Pin.RmRecursive(true))
