@@ -3,8 +3,8 @@ package coreapi
 import (
 	"context"
 
-	coreiface "github.com/ipfs/boxo/coreiface"
 	"github.com/ipfs/kubo/config"
+	coreiface "github.com/ipfs/kubo/core/coreiface"
 )
 
 type CoreExtensionAPI interface {

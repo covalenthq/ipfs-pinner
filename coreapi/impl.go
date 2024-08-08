@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 
-	coreiface "github.com/ipfs/boxo/coreiface"
 	"github.com/ipfs/kubo/config"
 	"github.com/ipfs/kubo/core"
 	icore "github.com/ipfs/kubo/core/coreapi"
+	coreiface "github.com/ipfs/kubo/core/coreiface"
 	corerepo "github.com/ipfs/kubo/core/corerepo"
 )
 
