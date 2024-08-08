@@ -1,12 +1,12 @@
 # Build - first phase
-FROM golang:1.20-alpine as builder
+FROM golang:1.22-alpine as builder
 RUN mkdir /build
 WORKDIR /build
 COPY . .
 RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o ipfs-server ./server/main.go
 
 # Runtime -  second phase.
-FROM alpine:3.19
+FROM alpine:3.20
 RUN mkdir /app
 WORKDIR /app
 RUN apk update && apk add --no-cache bash nodejs npm git && npm install -g @web3-storage/w3cli
@@ -17,7 +17,7 @@ RUN apk del git && rm -rf /var/cache/apk/* /root/.npm /tmp/*
 HEALTHCHECK --interval=10s --timeout=5s CMD wget --no-verbose --tries=1 --spider localhost:3001/health
 
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "./ipfs-server -port 3001 -w3-agent-key $W3_AGENT_KEY -w3-delegation-file $W3_DELEGATION_FILE --enable-gc" ]
+CMD [ "./ipfs-server -port 3001 -enable-gc-w3-agent-key $W3_AGENT_KEY -w3-delegation-file $W3_DELEGATION_FILE -enable-gc" ]
 
 # ipfs-pinner API server;
 EXPOSE 3001
