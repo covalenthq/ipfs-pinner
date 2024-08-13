@@ -138,10 +138,10 @@ We'll use w3cli to login and create a new space and register.
 
 #### installation
 ```bash
-➜ npm install -g @web3-storage/w3cli
+➜ npm install -g @web3-storage/w3cli@v7.6.2
 
 ➜ w3 --version
-w3, 7.0.3
+w3, 7.6.2
 ```
 
 #### login and check spaces
