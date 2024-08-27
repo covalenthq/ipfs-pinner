@@ -57,6 +57,8 @@ var (
 
 	DOWNLOAD_TIMEOUT = 12 * time.Minute // download can take a lot of time if it's not locally present
 	UPLOAD_TIMEOUT   = 60 * time.Second // uploads of around 6MB files happen in less than 10s typically
+
+	maxMemory = int64(100 << 20) // 100 MB
 )
 
 func main() {
@@ -166,15 +168,18 @@ func uploadHttpHandler(node pinner.PinnerNode) http.Handler {
 			respondError(w, err)
 			return
 		}
-		ccid, err := uploadHandler(contents, node)
-		if err != nil {
-			respondError(w, err)
-			return
-		} else {
-			succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
-			_, err := w.Write([]byte(succ_str))
+
+		for _, v := range contents {
+			ccid, err := uploadHandler(v, node)
 			if err != nil {
-				log.Println("error writing data to connection: %w", err)
+				respondError(w, err)
+				return
+			} else {
+				succStr := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
+				_, err := w.Write([]byte(succStr))
+				if err != nil {
+					log.Println("error writing data to connection: %w", err)
+				}
 			}
 		}
 	}
@@ -209,15 +214,17 @@ func cidHttpHandler(node pinner.PinnerNode) http.Handler {
 			return
 		}
 
-		ccid, err := cidHandler(contents, node)
-		if err != nil {
-			respondError(w, err)
-			return
-		} else {
-			succ_str := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
-			_, err := w.Write([]byte(succ_str))
+		for _, v := range contents {
+			ccid, err := cidHandler(v, node)
 			if err != nil {
-				log.Println("error writing data to connection: %w", err)
+				respondError(w, err)
+				return
+			} else {
+				succStr := fmt.Sprintf("{\"cid\": \"%s\"}", ccid.String())
+				_, err := w.Write([]byte(succStr))
+				if err != nil {
+					log.Println("error writing data to connection: %w", err)
+				}
 			}
 		}
 	}
@@ -225,29 +232,29 @@ func cidHttpHandler(node pinner.PinnerNode) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func readContentFromRequest(r *http.Request) (string, error) {
-	mreader, err := r.MultipartReader()
+func readContentFromRequest(r *http.Request) (map[string][]byte, error) {
+	err := r.ParseMultipartForm(maxMemory)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var contents string = ""
+	files := make(map[string][]byte)
+	for _, fileHeaders := range r.MultipartForm.File {
+		for _, fileHeader := range fileHeaders {
+			file, err := fileHeader.Open()
+			if err != nil {
+				return nil, err
+			}
+			defer file.Close()
 
-	for {
-		part, err := mreader.NextPart()
-		if err == io.EOF {
-			break
+			data, err := io.ReadAll(file)
+			if err != nil {
+				return nil, err
+			}
+			files[fileHeader.Filename] = data
 		}
-
-		pcontents, err := io.ReadAll(part)
-		if err != nil {
-			return "", err
-		}
-
-		contents += string(pcontents)
 	}
-
-	return contents, nil
+	return files, nil
 }
 
 func recoveryWrapper(h http.Handler) http.Handler {
@@ -271,11 +278,11 @@ func recoveryWrapper(h http.Handler) http.Handler {
 	})
 }
 
-func cidHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
+func cidHandler(contents []byte, node pinner.PinnerNode) (cid.Cid, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), UPLOAD_TIMEOUT)
 	defer cancel()
 
-	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader([]byte(contents)))
+	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader(contents))
 	if err != nil {
 		log.Printf("%v", err)
 		return cid.Undef, err
@@ -285,11 +292,11 @@ func cidHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
 	return fcid, nil
 }
 
-func uploadHandler(contents string, node pinner.PinnerNode) (cid.Cid, error) {
+func uploadHandler(contents []byte, node pinner.PinnerNode) (cid.Cid, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), UPLOAD_TIMEOUT)
 	defer cancel()
 
-	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader([]byte(contents)))
+	fcid, err := node.UnixfsService().GenerateDag(ctx, bytes.NewReader(contents))
 	if err != nil {
 		log.Printf("%v", err)
 		return cid.Undef, err
