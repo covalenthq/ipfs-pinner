@@ -13,13 +13,13 @@ require (
 	github.com/ipfs/kubo v0.29.0
 	github.com/ipld/go-car v0.6.2
 	github.com/ipld/go-ipld-prime v0.21.0
-	github.com/multiformats/go-multiaddr v0.12.4
+	github.com/multiformats/go-multiaddr v0.14.0
 	github.com/multiformats/go-multibase v0.2.0
 	github.com/multiformats/go-multihash v0.2.3
 	github.com/pkg/errors v0.9.1
 	github.com/web3-storage/go-ucanto v0.1.0
 	github.com/ybbus/httpretry v1.0.2
-	golang.org/x/oauth2 v0.21.0
+	golang.org/x/oauth2 v0.24.0
 )
 
 require (
