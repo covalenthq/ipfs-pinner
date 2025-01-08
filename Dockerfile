@@ -9,7 +9,7 @@ RUN go mod download && CGO_ENABLED=0 GOOS=linux go build -a -ldflags="-s -w" -o 
 FROM alpine:3.20
 RUN mkdir /app
 WORKDIR /app
-RUN apk update && apk add --no-cache bash nodejs npm git && npm install -g @web3-storage/w3cli@v7.6.2 && npm install -g crypto-random-string
+RUN apk update && apk add --no-cache bash nodejs npm git && npm install -g @web3-storage/w3cli@v7.9.1 && npm install -g crypto-random-string
 COPY --from=builder --chmod=700 /build/ipfs-server /app
 
 RUN apk del git && rm -rf /var/cache/apk/* /root/.npm /tmp/*
