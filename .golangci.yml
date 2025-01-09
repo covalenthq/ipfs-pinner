@@ -1,0 +1,73 @@
+# Refer to golangci-lint's example config file for more options and information:
+# https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+  # skip-dirs:
+  #   - binary/
+  #   - build/
+  #   - car/
+  #   - core/
+  #   - coreapi/
+  #   - dag/
+  #   - http/
+  #   - openapi/
+  #   - pinclient/
+  #   - server/
+  #   - w3up/
+
+linters:
+  enable:
+  #-------------main-list--------------#
+    - errcheck # Errcheck is a program for checking for unchecked errors in go programs. These unchecked errors can be critical bugs in some cases
+    - gosimple # Linter for Go source code that specializes in simplifying a code
+    - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    - ineffassign # Detects when assignments to existing variables are not used
+    - unused # Checks Go code for unused constants, variables, functions and types
+    - staticcheck # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
+
+disable:
+  # main-list
+    ## disable now re-enable later
+    ## re-enable never
+    - depguard # Go linter that checks if package imports are in a list of acceptable packages
+    - contextcheck # Check the function whether use a non-inherited context
+    - cyclop # Checks function and package cyclomatic complexity 
+    - durationcheck	# Check for two durations multiplied together
+    - exhaustivestruct	# Checks if all struct's fields are initialized
+    - forbidigo # Forbids identifiers
+    - forcetypeassert	# finds forced type assertions
+    - funlen # Tool for detection of long functions\
+    - gci	# Gci control golang package import order and make it always deterministic.
+    - gochecknoglobals # check that no global variables exist
+    - gochecknoinits	# Checks that no init functions are present in Go code
+    - gocognit	# Computes and checks the cognitive complexity of functions
+    - godot	# Check if comments end in a period
+    - goerr113	# Golang linter to check the errors handling expressions
+    - gofumpt	# Gofumpt checks whether code was gofumpt-ed
+    - gomnd # An analyzer to detect magic numbers
+    - gomoddirectives	# Manage the use of 'replace', 'retract', and 'excludes' directives in go.mod
+    - ifshort	# Checks that your code uses short syntax for if-statements whenever possible
+    - ireturn	# Accept Interfaces, Return Concrete Types
+    - lll	# Reports long lines
+    - maintidx # Measures the maintainability index of each function
+    - makezero # Finds slice declarations with non-zero initial length
+    - nakedret # Finds naked returns in functions greater than a specified function length
+    - nestif # Reports deeply nested if statements
+    - paralleltest # paralleltest detects missing usage of t.Parallel() method in your Go test
+    - prealloc # Finds slice declarations that could potentially be preallocated
+    - predeclared	# Find code that shadows one of Go's predeclared identifiers
+    - promlinter # Check Prometheus metrics naming via promlint
+    - tagliatelle	# Checks the struct tags.
+    - tenv # tenv is analyzer that detects using os.Setenv instead of t.Setenv since Go1.17
+    - testpackage	# linter that makes you use a separate _test package
+    - thelper	# thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+    - tparallel	# tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
+    - wastedassign # wastedassign finds wasted assignment statements
+    - wsl	# Whitespace Linter - Forces you to use empty lines!
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0

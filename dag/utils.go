@@ -52,7 +52,11 @@ func (fetcher *httpContentFetcher) tryFetch(ctx context.Context, cid string, url
 		return emptyBytes, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("failed to close response body: %v", err)
+		}
+	}()
 	if resp.StatusCode == 200 {
 		return io.ReadAll(resp.Body)
 	} else {

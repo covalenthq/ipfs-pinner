@@ -245,7 +245,11 @@ func readContentFromRequest(r *http.Request) (map[string][]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			defer file.Close()
+			defer func() {
+				if err := file.Close(); err != nil {
+					log.Printf("failed to close file: %v", err)
+				}
+			}()
 
 			data, err := io.ReadAll(file)
 			if err != nil {
@@ -310,7 +314,12 @@ func uploadHandler(contents []byte, node pinner.PinnerNode) (cid.Cid, error) {
 		return cid.Undef, err
 	}
 
-	defer carf.Close() // should delete the file due to unlink
+	defer func() {
+		if err := carf.Close(); err != nil {
+			log.Printf("failed to close car file: %v", err)
+		}
+	}()
+
 	defer func() {
 		err := syscall.Unlink(carf.Name())
 		if err != nil {
@@ -322,7 +331,10 @@ func uploadHandler(contents []byte, node pinner.PinnerNode) (cid.Cid, error) {
 
 	err = node.CarExporter().Export(ctx, fcid, carf)
 	if err != nil {
-		carf.Close()
+		// For the non-deferred calls:
+		if err := carf.Close(); err != nil {
+			log.Printf("failed to close car file: %v", err)
+		}
 		log.Printf("%v", err)
 		return cid.Undef, err
 	}
@@ -339,7 +351,9 @@ func uploadHandler(contents []byte, node pinner.PinnerNode) (cid.Cid, error) {
 	}
 	log.Printf("uploaded file has root cid: %s\n", ccid)
 
-	carf.Close()
+	if err := carf.Close(); err != nil {
+		log.Printf("failed to close car file: %v", err)
+	}
 	return ccid, nil
 }
 
