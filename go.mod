@@ -7,7 +7,7 @@ toolchain go1.23.4
 require (
 	github.com/ipfs/boxo v0.24.3
 	github.com/ipfs/go-block-format v0.2.0
-	github.com/ipfs/go-cid v0.4.1
+	github.com/ipfs/go-cid v0.5.0
 	github.com/ipfs/go-ipld-format v0.6.0
 	github.com/ipfs/go-log/v2 v2.5.1
 	github.com/ipfs/kubo v0.32.1
