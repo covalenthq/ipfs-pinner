@@ -1,8 +1,7 @@
 module github.com/covalenthq/ipfs-pinner
 
 go 1.23
-
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
 	github.com/ipfs/boxo v0.24.3
@@ -19,7 +18,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/web3-storage/go-ucanto v0.1.0
 	github.com/ybbus/httpretry v1.0.2
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.29.0
 )
 
 require (
